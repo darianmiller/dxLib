@@ -92,7 +92,7 @@ type
     destructor Destroy(); override;
 
     function Start(const pExecOption:T5xThreadExecOptions=teRepeatRun):Boolean;
-    procedure Stop();  //not intended for use if StartOption is RunThenFree
+    function Stop():Boolean;  //not intended for use if StartOption is RunThenFree
 
     function CanBeStarted():Boolean;
     function ThreadIsActive():Boolean;
@@ -158,6 +158,8 @@ procedure T5xThread.Execute();
 var
   vCoInitCalled:Boolean;
 begin
+  vCoInitCalled := False;
+  
   try
     try
       while not ShouldTerminate() do
@@ -179,37 +181,40 @@ begin
           CoInitialize(nil);
           vCoInitCalled := True;
         end;
-        BeforeRun();
         try
-          while ThreadIsActive() do
-          begin
-            Run(); //descendant's code
-            DoOnRunCompletion();
+          BeforeRun();
+          try
+            while ThreadIsActive() do
+            begin
+              Run(); //descendant's code
+              DoOnRunCompletion();
 
-            case fStartOption of
-            teRepeatRun:
-              begin
-                //loop
-              end;
-            teRunThenSuspend:
-              begin
-                SuspendThread(tsSuspendPending_RunOnceComplete);
-                Break;
-              end;
-            teRunThenFree:
-              begin
-                FreeOnTerminate := True;
-                Terminate();
-                Break;
-              end;
-            else
-              begin
-                raise Exception.Create('Invalid StartOption detected in Execute()');
+              case fStartOption of
+              teRepeatRun:
+                begin
+                  //loop
+                end;
+              teRunThenSuspend:
+                begin
+                  SuspendThread(tsSuspendPending_RunOnceComplete);
+                  Break;
+                end;
+              teRunThenFree:
+                begin
+                  FreeOnTerminate := True;
+                  Terminate();
+                  Break;
+                end;
+              else
+                begin
+                  raise Exception.Create('Invalid StartOption detected in Execute()');
+                end;
               end;
             end;
+          finally
+            AfterRun();
           end;
         finally
-          AfterRun();
           if vCoInitCalled then
           begin
             CoUnInitialize();
@@ -320,11 +325,18 @@ begin
 end;
 
 
-procedure T5xThread.Stop();
+function T5xThread.Stop():Boolean;
 begin
-  SuspendThread(tsSuspendPending_StopRequestReceived);
+  if ThreadIsActive() then
+  begin
+    Result := True;
+    SuspendThread(tsSuspendPending_StopRequestReceived);
+  end
+  else
+  begin
+    Result := False;
+  end;
 end;
-
 
 procedure T5xThread.SuspendThread(const pReason:T5xThreadState);
 begin
