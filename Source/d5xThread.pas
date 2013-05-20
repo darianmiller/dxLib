@@ -54,6 +54,7 @@ type
     fThreadState:T5xThreadState;
     fOnException:T5xExceptionEvent;
     fOnRunCompletion:T5xNotifyThreadEvent;
+    fOnReportProgress:TGetStrProc;
     fStateChangeLock:T5xProcessResourceLock;
     fAbortableSleepEvent:TEvent;
     fResumeSignal:TEvent;
@@ -64,6 +65,7 @@ type
     fRequireCoinitialize:Boolean;
     function GetThreadState():T5xThreadState;
     procedure SuspendThread(const pReason:T5xThreadState);
+    procedure Sync_CallOnReportProgress();
     procedure Sync_CallOnRunCompletion();
     procedure DoOnRunCompletion();
     property ThreadState:T5xThreadState read GetThreadState;
@@ -78,6 +80,7 @@ type
     procedure Suspending(); virtual;
     procedure Resumed(); virtual;
     function ExternalRequestToStop():Boolean; virtual;
+    procedure ReportProgress(const pAnyProgressText:string);
     function ShouldTerminate():Boolean;
 
     procedure Sleep(const pSleepTimeMS:Integer);
@@ -96,6 +99,7 @@ type
 
     property OnException:T5xExceptionEvent read fOnException write fOnException;
     property OnRunCompletion:T5xNotifyThreadEvent read fOnRunCompletion write fOnRunCompletion;
+    property OnReportProgress:TGetStrProc read fOnReportProgress write fOnReportProgress;
   end;
 
 
@@ -399,5 +403,24 @@ begin
   Result := Terminated or
             (ThreadState in [tsTerminationPending_DestroyInProgress, tsTerminated]);
 end;
+
+procedure T5xThread.Sync_CallOnReportProgress();
+begin
+  if Assigned(fOnReportProgress) then
+  begin
+    fOnReportProgress(fProgressTextToReport);
+  end;
+end;
+
+
+procedure T5xThread.ReportProgress(const pAnyProgressText:string);
+begin
+  if Assigned(fOnReportProgress) and ThreadIsActive then
+  begin
+    fProgressTextToReport := pAnyProgressText;
+    CallSynchronize(Sync_CallOnReportProgress);
+  end;
+end;
+
 
 end.
