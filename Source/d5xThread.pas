@@ -16,7 +16,7 @@ IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other
 dealings in this Software without prior written authorization of the copyright holder.
 *)
-unit soThread;
+unit d5xThread;
 
 interface
 
@@ -24,17 +24,17 @@ uses
   Classes,
   SysUtils,
   SyncObjs,
-  soProcessLock;
+  d5xProcessLock;
 
 
 type
 
-  TsoThread = class;
-  TsoNotifyThreadEvent = procedure(const pThread:TsoThread) of object;
-  TsoExceptionEvent = procedure(pSender:TObject; pException:Exception) of object;
+  T5xThread = class;
+  T5xNotifyThreadEvent = procedure(const pThread:T5xThread) of object;
+  T5xExceptionEvent = procedure(pSender:TObject; pException:Exception) of object;
 
 
-  TsoThreadState = (tsActive,
+  T5xThreadState = (tsActive,
                     tsSuspended_NotYetStarted,
                     tsSuspended_ManuallyStopped,
                     tsSuspended_RunOnceCompleted,
@@ -43,30 +43,30 @@ type
                     tsSuspendPending_RunOnceComplete,
                     tsTerminated);
 
-  TsoStartOptions = (soRepeatRun,
+  T5xStartOptions = (soRepeatRun,
                      soRunThenSuspend,
                      soRunThenFree);
 
 
 
-  TsoThread = class(TThread)
+  T5xThread = class(TThread)
   private
-    fThreadState:TsoThreadState;
-    fOnException:TsoExceptionEvent;
-    fOnRunCompletion:TsoNotifyThreadEvent;
-    fStateChangeLock:TsoProcessResourceLock;
+    fThreadState:T5xThreadState;
+    fOnException:T5xExceptionEvent;
+    fOnRunCompletion:T5xNotifyThreadEvent;
+    fStateChangeLock:T5xProcessResourceLock;
     fAbortableSleepEvent:TEvent;
     fResumeSignal:TEvent;
     fTerminateSignal:TEvent;
     fExecDoneSignal:TEvent;
-    fStartOption:TsoStartOptions;
+    fStartOption:T5xStartOptions;
     fProgressTextToReport:String;
     fRequireCoinitialize:Boolean;
-    function GetThreadState():TsoThreadState;
-    procedure SuspendThread(const pReason:TsoThreadState);
+    function GetThreadState():T5xThreadState;
+    procedure SuspendThread(const pReason:T5xThreadState);
     procedure Sync_CallOnRunCompletion();
     procedure DoOnRunCompletion();
-    property ThreadState:TsoThreadState read GetThreadState;
+    property ThreadState:T5xThreadState read GetThreadState;
     procedure CallSynchronize(Method: TThreadMethod);
   protected
     procedure Execute(); override;
@@ -82,20 +82,20 @@ type
 
     procedure Sleep(const pSleepTimeMS:Integer);
 
-    property StartOption:TsoStartOptions read fStartOption write fStartOption;
+    property StartOption:T5xStartOptions read fStartOption write fStartOption;
     property RequireCoinitialize:Boolean read fRequireCoinitialize write fRequireCoinitialize;
   public
     constructor Create(); virtual;
     destructor Destroy(); override;
 
-    function Start(const pStartOption:TsoStartOptions=soRepeatRun):Boolean;
+    function Start(const pStartOption:T5xStartOptions=soRepeatRun):Boolean;
     procedure Stop();  //not intended for use if StartOption is soRunThenFree
 
     function CanBeStarted():Boolean;
     function IsActive():Boolean;
 
-    property OnException:TsoExceptionEvent read fOnException write fOnException;
-    property OnRunCompletion:TsoNotifyThreadEvent read fOnRunCompletion write fOnRunCompletion;
+    property OnException:T5xExceptionEvent read fOnException write fOnException;
+    property OnRunCompletion:T5xNotifyThreadEvent read fOnRunCompletion write fOnRunCompletion;
   end;
 
 
@@ -106,11 +106,11 @@ uses
   Windows;
 
 
-constructor TsoThread.Create();
+constructor T5xThread.Create();
 begin
   inherited Create(True); //We always create suspended, user must call .Start()
   fThreadState := tsSuspended_NotYetStarted;
-  fStateChangeLock := TsoProcessResourceLock.Create();
+  fStateChangeLock := T5xProcessResourceLock.Create();
   fAbortableSleepEvent := TEvent.Create(nil, True, False, '');
   fResumeSignal := TEvent.Create(nil, True, False, '');
   fTerminateSignal := TEvent.Create(nil, True, False, '');
@@ -118,7 +118,7 @@ begin
 end;
 
 
-destructor TsoThread.Destroy();
+destructor T5xThread.Destroy();
 begin
   if ThreadState <> tsSuspended_NotYetStarted then
   begin
@@ -135,7 +135,7 @@ begin
 end;
 
 
-procedure TsoThread.Execute();
+procedure T5xThread.Execute();
 
             procedure WaitForResume();
             var
@@ -147,7 +147,7 @@ procedure TsoThread.Execute();
               vWaitForResponse := WaitForMultipleObjects(2, @vWaitForEventHandles[0], False, INFINITE);
               case vWaitForResponse of
               WAIT_OBJECT_0 + 1: Terminate;
-              WAIT_FAILED: RaiseLastOSError;
+              WAIT_FAILED: RaiseLastWin32Error; //D6+ =RaiseLastOSError;
               //else resume
               end;
             end;
@@ -230,7 +230,7 @@ begin
 end;
 
 
-procedure TsoThread.Suspending();
+procedure T5xThread.Suspending();
 begin
   fStateChangeLock.Lock();
   try
@@ -248,33 +248,33 @@ begin
 end;
 
 
-procedure TsoThread.Resumed();
+procedure T5xThread.Resumed();
 begin
   fAbortableSleepEvent.ResetEvent();
   fResumeSignal.ResetEvent();
 end;
 
 
-function TsoThread.ExternalRequestToStop:Boolean;
+function T5xThread.ExternalRequestToStop:Boolean;
 begin
   //Intended to be overriden - for descendant's use as needed
   Result := False;
 end;
 
 
-procedure TsoThread.BeforeRun();
+procedure T5xThread.BeforeRun();
 begin
   //Intended to be overriden - for descendant's use as needed
 end;
 
 
-procedure TsoThread.AfterRun();
+procedure T5xThread.AfterRun();
 begin
   //Intended to be overriden - for descendant's use as needed
 end;
 
 
-function TsoThread.Start(const pStartOption:TsoStartOptions=soRepeatRun):Boolean;
+function T5xThread.Start(const pStartOption:T5xStartOptions=soRepeatRun):Boolean;
 var
   vNeedToWakeFromSuspendedCreationState:Boolean;
 begin
@@ -316,13 +316,13 @@ begin
 end;
 
 
-procedure TsoThread.Stop();
+procedure T5xThread.Stop();
 begin
   SuspendThread(tsSuspendPending_StopRequestReceived);
 end;
 
 
-procedure TsoThread.SuspendThread(const pReason:TsoThreadState);
+procedure T5xThread.SuspendThread(const pReason:T5xThreadState);
 begin
   fStateChangeLock.Lock();
   try
@@ -334,19 +334,19 @@ begin
 end;
 
 
-procedure TsoThread.Sync_CallOnRunCompletion();
+procedure T5xThread.Sync_CallOnRunCompletion();
 begin
   if Assigned(fOnRunCompletion) then fOnRunCompletion(Self);
 end;
 
 
-procedure TsoThread.DoOnRunCompletion();
+procedure T5xThread.DoOnRunCompletion();
 begin
   if Assigned(fOnRunCompletion) then CallSynchronize(Sync_CallOnRunCompletion);
 end;
 
 
-function TsoThread.GetThreadState():TsoThreadState;
+function T5xThread.GetThreadState():T5xThreadState;
 begin
   fStateChangeLock.Lock();
   try
@@ -365,26 +365,26 @@ begin
 end;
 
 
-function TsoThread.CanBeStarted():Boolean;
+function T5xThread.CanBeStarted():Boolean;
 begin
   Result := (ThreadState in [tsSuspended_NotYetStarted,
                              tsSuspended_ManuallyStopped,
                              tsSuspended_RunOnceCompleted]);
 end;
 
-function TsoThread.IsActive():Boolean;
+function T5xThread.IsActive():Boolean;
 begin
   Result := (ThreadState = tsActive);
 end;
 
 
-procedure TsoThread.Sleep(const pSleepTimeMS:Integer);
+procedure T5xThread.Sleep(const pSleepTimeMS:Integer);
 begin
   fAbortableSleepEvent.WaitFor(pSleepTimeMS);
 end;
 
 
-procedure TsoThread.CallSynchronize(Method: TThreadMethod);
+procedure T5xThread.CallSynchronize(Method: TThreadMethod);
 begin
   if IsActive() then
   begin
@@ -392,7 +392,7 @@ begin
   end;
 end;
 
-Function TsoThread.ShouldTerminate():Boolean;
+Function T5xThread.ShouldTerminate():Boolean;
 begin
   Result := Terminated or
             (ThreadState in [tsTerminationPending_DestroyInProgress, tsTerminated]);

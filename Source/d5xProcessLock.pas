@@ -16,14 +16,14 @@ IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other
 dealings in this Software without prior written authorization of the copyright holder.
 *)
-unit soProcessLock;
+unit d5xProcessLock;
 
 interface
 uses
   Windows;
 
 type
-  TsoProcessResourceLock = class(TObject)
+  T5xProcessResourceLock = class(TObject)
   protected
     fProcessWideLock:TRTLCriticalSection;
   public
@@ -39,33 +39,33 @@ type
 implementation
 
 
-constructor TsoProcessResourceLock.Create();
+constructor T5xProcessResourceLock.Create();
 begin
   inherited Create();
   InitializeCriticalSection(fProcessWideLock);
 end;
 
 
-destructor TsoProcessResourceLock.Destroy();
+destructor T5xProcessResourceLock.Destroy();
 begin
   DeleteCriticalSection(fProcessWideLock);
   inherited Destroy();
 end;
 
 
-procedure TsoProcessResourceLock.Lock();
+procedure T5xProcessResourceLock.Lock();
 begin
   EnterCriticalSection(fProcessWideLock);
 end;
 
 
-procedure TsoProcessResourceLock.Unlock();
+procedure T5xProcessResourceLock.Unlock();
 begin
   LeaveCriticalSection(fProcessWideLock);
 end;
 
 
-function TsoProcessResourceLock.TryLock():Boolean;
+function T5xProcessResourceLock.TryLock():Boolean;
 begin
   Result := TryEnterCriticalSection(fProcessWideLock);
 end;
