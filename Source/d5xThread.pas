@@ -43,9 +43,9 @@ type
                     tsSuspendPending_RunOnceComplete,
                     tsTerminated);
 
-  T5xStartOptions = (soRepeatRun,
-                     soRunThenSuspend,
-                     soRunThenFree);
+  T5xThreadExecOptions = (teRepeatRun,
+                          teRunThenSuspend,
+                          teRunThenFree);
 
 
 
@@ -59,7 +59,7 @@ type
     fResumeSignal:TEvent;
     fTerminateSignal:TEvent;
     fExecDoneSignal:TEvent;
-    fStartOption:T5xStartOptions;
+    fStartOption:T5xThreadExecOptions;
     fProgressTextToReport:String;
     fRequireCoinitialize:Boolean;
     function GetThreadState():T5xThreadState;
@@ -82,17 +82,17 @@ type
 
     procedure Sleep(const pSleepTimeMS:Integer);
 
-    property StartOption:T5xStartOptions read fStartOption write fStartOption;
+    property StartOption:T5xThreadExecOptions read fStartOption write fStartOption;
     property RequireCoinitialize:Boolean read fRequireCoinitialize write fRequireCoinitialize;
   public
     constructor Create(); virtual;
     destructor Destroy(); override;
 
-    function Start(const pStartOption:T5xStartOptions=soRepeatRun):Boolean;
-    procedure Stop();  //not intended for use if StartOption is soRunThenFree
+    function Start(const pExecOption:T5xThreadExecOptions=teRepeatRun):Boolean;
+    procedure Stop();  //not intended for use if StartOption is RunThenFree
 
     function CanBeStarted():Boolean;
-    function IsActive():Boolean;
+    function ThreadIsActive():Boolean;
 
     property OnException:T5xExceptionEvent read fOnException write fOnException;
     property OnRunCompletion:T5xNotifyThreadEvent read fOnRunCompletion write fOnRunCompletion;
@@ -158,7 +158,7 @@ begin
     try
       while not ShouldTerminate() do
       begin
-        if not IsActive() then
+        if not ThreadIsActive() then
         begin
           if ShouldTerminate() then Break;
           Suspending;
@@ -177,22 +177,22 @@ begin
         end;
         BeforeRun();
         try
-          while IsActive() do
+          while ThreadIsActive() do
           begin
             Run(); //descendant's code
             DoOnRunCompletion();
 
             case fStartOption of
-            soRepeatRun:
+            teRepeatRun:
               begin
                 //loop
               end;
-            soRunThenSuspend:
+            teRunThenSuspend:
               begin
                 SuspendThread(tsSuspendPending_RunOnceComplete);
                 Break;
               end;
-            soRunThenFree:
+            teRunThenFree:
               begin
                 FreeOnTerminate := True;
                 Terminate();
@@ -274,7 +274,7 @@ begin
 end;
 
 
-function T5xThread.Start(const pStartOption:T5xStartOptions=soRepeatRun):Boolean;
+function T5xThread.Start(const pExecOption:T5xThreadExecOptions=teRepeatRun):Boolean;
 var
   vNeedToWakeFromSuspendedCreationState:Boolean;
 begin
@@ -282,7 +282,7 @@ begin
 
   fStateChangeLock.Lock();
   try
-    StartOption := pStartOption;
+    StartOption := pExecOption;
 
     Result := CanBeStarted();
     if Result then
@@ -372,7 +372,8 @@ begin
                              tsSuspended_RunOnceCompleted]);
 end;
 
-function T5xThread.IsActive():Boolean;
+
+function T5xThread.ThreadIsActive():Boolean;
 begin
   Result := (ThreadState = tsActive);
 end;
@@ -386,13 +387,14 @@ end;
 
 procedure T5xThread.CallSynchronize(Method: TThreadMethod);
 begin
-  if IsActive() then
+  if ThreadIsActive() then
   begin
     Synchronize(Method);
   end;
 end;
 
-Function T5xThread.ShouldTerminate():Boolean;
+
+function T5xThread.ShouldTerminate():Boolean;
 begin
   Result := Terminated or
             (ThreadState in [tsTerminationPending_DestroyInProgress, tsTerminated]);
