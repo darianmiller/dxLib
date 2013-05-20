@@ -22,6 +22,7 @@ interface
 
 uses
   Classes,
+  Windows,
   SysUtils,
   SyncObjs,
   d5xProcessLock;
@@ -87,6 +88,7 @@ type
 
     property StartOption:T5xThreadExecOptions read fStartOption write fStartOption;
     property RequireCoinitialize:Boolean read fRequireCoinitialize write fRequireCoinitialize;
+    function WaitForHandle(const pHandle:THandle; const pTimeout:Cardinal=INFINITE):Boolean;
   public
     constructor Create(); virtual;
     destructor Destroy(); override;
@@ -106,11 +108,12 @@ type
 implementation
 
 uses
-  ActiveX,
-  Windows;
+  ActiveX;
 
 
 constructor T5xThread.Create();
+const
+  ONSTATE = True;
 begin
   inherited Create(True); //We always create suspended, user must call .Start()
   fThreadState := tsSuspended_NotYetStarted;
@@ -118,7 +121,7 @@ begin
   fAbortableSleepEvent := TEvent.Create(nil, True, False, '');
   fResumeSignal := TEvent.Create(nil, True, False, '');
   fTerminateSignal := TEvent.Create(nil, True, False, '');
-  fExecDoneSignal := TEvent.Create(nil, True, False, '');
+  fExecDoneSignal := TEvent.Create(nil, True, ONSTATE, '');
 end;
 
 
@@ -140,26 +143,11 @@ end;
 
 
 procedure T5xThread.Execute();
-
-            procedure WaitForResume();
-            var
-              vWaitForEventHandles:array[0..1] of THandle;
-              vWaitForResponse:DWORD;
-            begin
-              vWaitForEventHandles[0] := fResumeSignal.Handle;
-              vWaitForEventHandles[1] := fTerminateSignal.Handle;
-              vWaitForResponse := WaitForMultipleObjects(2, @vWaitForEventHandles[0], False, INFINITE);
-              case vWaitForResponse of
-              WAIT_OBJECT_0 + 1: Terminate;
-              WAIT_FAILED: RaiseLastWin32Error; //D6+ =RaiseLastOSError;
-              //else resume
-              end;
-            end;
 var
   vCoInitCalled:Boolean;
 begin
+  fExecDoneSignal.ResetEvent;
   vCoInitCalled := False;
-  
   try
     try
       while not ShouldTerminate() do
@@ -168,8 +156,10 @@ begin
         begin
           if ShouldTerminate() then Break;
           Suspending;
-          WaitForResume();   //suspend()
+          
+          WaitForHandle(fResumeSignal.Handle);
 
+          // -- RESUME -- thread
           //Note: Only two reasons to wake up a suspended thread:
           //1: We are going to terminate it  2: we want it to restart doing work
           if ShouldTerminate() then Break;
@@ -434,5 +424,26 @@ begin
   end;
 end;
 
+
+function T5xThread.WaitForHandle(const pHandle:THandle; const pTimeout:Cardinal=INFINITE):Boolean;
+var
+  vWaitForEventHandles:array[0..2] of THandle;
+  vWaitForResponse:DWORD;
+begin
+  Result := False;
+  vWaitForEventHandles[0] := pHandle;   //initially for: fResumeSignal.Handle;
+  vWaitForEventHandles[1] := fTerminateSignal.Handle;
+  vWaitForEventHandles[2] := fAbortableSleepEvent.Handle;
+  vWaitForResponse := WaitForMultipleObjects(3, @vWaitForEventHandles[0], False, pTimeout);  //can change timeout and repeat/until Terminated or (vWaitResponse = WAIT_OBJECT_0)
+  case vWaitForResponse of
+  WAIT_OBJECT_0: Result := True;  //initially for Resume
+  WAIT_OBJECT_0 + 1: Terminate();
+  WAIT_OBJECT_0 + 2: fAbortableSleepEvent.ResetEvent(); //likely a stop received while we are waiting for an external handle
+  WAIT_FAILED:
+     begin
+       RaiseLastWin32Error; //D6+ =RaiseLastOSError;
+     end;
+  end;
+end;
 
 end.
