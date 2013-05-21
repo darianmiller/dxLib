@@ -161,7 +161,9 @@ begin
 
           // -- RESUME -- thread
           //Note: Only two reasons to wake up a suspended thread:
-          //1: We are going to terminate it  2: we want it to restart doing work
+          //1: We are going to terminate it
+          //2: we want it to restart doing work
+          //(3) Programmer hits stop twice without Starting protected in Stop()
           if ShouldTerminate() then Break;
           Resumed();
         end;
@@ -301,7 +303,16 @@ begin
       begin
         //We haven't started Exec loop at all yet
         //Since we start all threads in suspended state, we need one initial Resume()
+       {$IFDEF VER130}   //Delphi5, 'CompilerVersion' check not available
         Resume();
+       {$ELSE}
+         {$IF CompilerVersion >= 14.0}
+           //Resume() deprecated in D2010+
+           inherited Start();
+         {$ELSE}
+           Resume();
+         {$END}
+       {$END}
       end
       else
       begin
@@ -441,7 +452,11 @@ begin
   WAIT_OBJECT_0 + 2: fAbortableSleepEvent.ResetEvent(); //likely a stop received while we are waiting for an external handle
   WAIT_FAILED:
      begin
-       RaiseLastWin32Error; //D6+ =RaiseLastOSError;
+       {$IFDEF VER130}   //Delphi5
+       RaiseLastWin32Error;
+       {$ELSE}
+       RaiseLastOSError; //added to D6+
+       {$ENDIF}
      end;
   end;
 end;
