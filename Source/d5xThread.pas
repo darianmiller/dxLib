@@ -16,6 +16,8 @@ IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other
 dealings in this Software without prior written authorization of the copyright holder.
 *)
+
+{$I d5x.inc}
 unit d5xThread;
 
 interface
@@ -303,16 +305,11 @@ begin
       begin
         //We haven't started Exec loop at all yet
         //Since we start all threads in suspended state, we need one initial Resume()
-       {$IFDEF VER130}   //Delphi5, 'CompilerVersion' check not available
-        Resume();
+       {$IFDEF RESUME_DEPRECATED}
+         inherited Start();
        {$ELSE}
-         {$IF CompilerVersion >= 14.0}
-           //Resume() deprecated in D2010+
-           inherited Start();
-         {$ELSE}
-           Resume();
-         {$END}
-       {$END}
+         Resume();
+       {$ENDIF}
       end
       else
       begin
@@ -452,10 +449,10 @@ begin
   WAIT_OBJECT_0 + 2: fAbortableSleepEvent.ResetEvent(); //likely a stop received while we are waiting for an external handle
   WAIT_FAILED:
      begin
-       {$IFDEF VER130}   //Delphi5
-       RaiseLastWin32Error;
+       {$IFDEF DELPHI6_UP}
+       RaiseLastOSError; 
        {$ELSE}
-       RaiseLastOSError; //added to D6+
+       RaiseLastWin32Error;
        {$ENDIF}
      end;
   end;
