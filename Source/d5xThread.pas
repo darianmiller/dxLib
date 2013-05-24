@@ -463,7 +463,7 @@ begin
 
     case vWaitForResponse of
     WAIT_OBJECT_0: Result := True;  //initially for Resume, but also usable by descendants while in their Run()
-    WAIT_OBJECT_0 + 2: fAbortableSleepEvent.ResetEvent(); //likely a stop received while we are waiting for an external handle
+    WAIT_OBJECT_0 + 1: fAbortableSleepEvent.ResetEvent(); //likely a stop received while we are waiting for an external handle
     WAIT_FAILED:
        begin
          {$IFDEF DELPHI6_UP}
