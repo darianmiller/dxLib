@@ -61,6 +61,7 @@ type
     fStateChangeLock:T5xProcessResourceLock;
     fAbortableSleepEvent:TEvent;
     fResumeSignal:TEvent;
+    fAwakeToFreeEvent:TEvent;
     fStartOption:T5xThreadExecOptions;
     fProgressTextToReport:String;
     fRequireCoinitialize:Boolean;
@@ -128,9 +129,9 @@ begin
   {$IFDEF VER130} //Workaround for Delphi5 issue of free'ing a non-started thread created in suspended mode
   if fThreadState = tsSuspended_NotYetStarted then
   begin
-    Terminate();
+    fAwakeToFreeEvent := TEvent.Create(nil, True, False, '');
     Start();
-    //TerminateThread(Handle, 0);
+    fAwakeToFreeEvent.WaitFor(INFINITE);
   end;
   {$ENDIF}
   fAbortableSleepEvent.SetEvent();
@@ -145,6 +146,14 @@ end;
 procedure T5xThread.Execute();
 begin
   try
+    if Assigned(fAwakeToFreeEvent) then
+    begin
+      //(D5 fix) We've awoken a thread created in Suspend mode just to free it
+      fAwakeToFreeEvent.SetEvent();
+      Terminate();
+      Exit;
+    end;
+    
     while not Terminated do
     begin
       if fRequireCoinitialize then
