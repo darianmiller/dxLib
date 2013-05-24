@@ -128,7 +128,9 @@ begin
   {$IFDEF VER130} //Workaround for Delphi5 issue of free'ing a non-started thread created in suspended mode
   if fThreadState = tsSuspended_NotYetStarted then
   begin
-    TerminateThread(Handle, 0);
+    Terminate();
+    Start();
+    //TerminateThread(Handle, 0);
   end;
   {$ENDIF}
   fAbortableSleepEvent.SetEvent();
