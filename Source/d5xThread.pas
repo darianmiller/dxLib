@@ -41,7 +41,6 @@ type
                     tsSuspended_NotYetStarted,
                     tsSuspended_ManuallyStopped,
                     tsSuspended_RunOnceCompleted,
-                    tsTerminationPending_DestroyInProgress,
                     tsSuspendPending_StopRequestReceived,
                     tsSuspendPending_RunOnceComplete,
                     tsTerminated);
@@ -55,14 +54,13 @@ type
   T5xThread = class(TThread)
   private
     fThreadState:T5xThreadState;
+    fTrappedException:Exception;
     fOnException:T5xExceptionEvent;
     fOnRunCompletion:T5xNotifyThreadEvent;
     fOnReportProgress:TGetStrProc;
     fStateChangeLock:T5xProcessResourceLock;
     fAbortableSleepEvent:TEvent;
     fResumeSignal:TEvent;
-    fTerminateSignal:TEvent;
-    fExecDoneSignal:TEvent;
     fStartOption:T5xThreadExecOptions;
     fProgressTextToReport:String;
     fRequireCoinitialize:Boolean;
@@ -70,9 +68,11 @@ type
     procedure SuspendThread(const pReason:T5xThreadState);
     procedure Sync_CallOnReportProgress();
     procedure Sync_CallOnRunCompletion();
+    procedure Sync_CallOnException();
     procedure DoOnRunCompletion();
+    procedure DoOnException();
     property ThreadState:T5xThreadState read GetThreadState;
-    procedure CallSynchronize(Method: TThreadMethod);
+    procedure CallSynchronize(pMethod:TThreadMethod);
   protected
     procedure Execute(); override;
 
@@ -80,13 +80,12 @@ type
     procedure Run(); virtual; ABSTRACT;  // Must override
     procedure AfterRun(); virtual;       // Override as needed
 
-    procedure Suspending(); virtual;
-    procedure Resumed(); virtual;
+    procedure WaitForResume(); virtual;
+    procedure ThreadHasResumed(); virtual;
     function ExternalRequestToStop():Boolean; virtual;
     procedure ReportProgress(const pAnyProgressText:string);
-    function ShouldTerminate():Boolean;
 
-    procedure Sleep(const pSleepTimeMS:Integer);
+    procedure Sleep(const pSleepTimeMS:Integer); //abortable sleep
 
     property StartOption:T5xThreadExecOptions read fStartOption write fStartOption;
     property RequireCoinitialize:Boolean read fRequireCoinitialize write fRequireCoinitialize;
@@ -122,118 +121,90 @@ begin
   fStateChangeLock := T5xProcessResourceLock.Create();
   fAbortableSleepEvent := TEvent.Create(nil, True, False, '');
   fResumeSignal := TEvent.Create(nil, True, False, '');
-  fTerminateSignal := TEvent.Create(nil, True, False, '');
-  fExecDoneSignal := TEvent.Create(nil, True, ONSTATE, '');
 end;
-
 
 destructor T5xThread.Destroy();
 begin
-  if ThreadState <> tsSuspended_NotYetStarted then
+  {$IFDEF VER130} //Workaround for Delphi5 issue of free'ing a non-started thread created in suspended mode
+  if fThreadState = tsSuspended_NotYetStarted then
   begin
-    fTerminateSignal.SetEvent();
-    SuspendThread(tsTerminationPending_DestroyInProgress);
-    fExecDoneSignal.WaitFor(INFINITE); //we need to wait until we are done before inherited gets called and locks up as FFinished is not yet set
+    TerminateThread(Handle, 0);
   end;
+  {$ENDIF}
+  fAbortableSleepEvent.SetEvent();
+  fResumeSignal.SetEvent();
   inherited;
-  fAbortableSleepEvent.Free();
   fStateChangeLock.Free();
   fResumeSignal.Free();
-  fTerminateSignal.Free();
-  fExecDoneSignal.Free();
+  fAbortableSleepEvent.Free();
 end;
 
 
 procedure T5xThread.Execute();
-var
-  vCoInitCalled:Boolean;
 begin
-  fExecDoneSignal.ResetEvent;
-  vCoInitCalled := False;
   try
-    try
-      while not ShouldTerminate() do
+    while not Terminated do
+    begin
+      if fRequireCoinitialize then
       begin
-        if not ThreadIsActive() then
-        begin
-          if ShouldTerminate() then Break;
-          Suspending;
-          
-          WaitForHandle(fResumeSignal.Handle);
-
-          // -- RESUME -- thread
-          //Note: Only two reasons to wake up a suspended thread:
-          //1: We are going to terminate it
-          //2: we want it to restart doing work
-          //(3) Programmer hits stop twice without Starting protected in Stop()
-          if ShouldTerminate() then Break;
-          Resumed();
-        end;
-
-        if fRequireCoinitialize then
-        begin
-          CoInitialize(nil);
-          vCoInitCalled := True;
-        end;
+        CoInitialize(nil);
+      end;
+      try
+        ThreadHasResumed();
+        BeforeRun();
         try
-          BeforeRun();
-          try
-            while ThreadIsActive() do
-            begin
-              Run(); //descendant's code
-              DoOnRunCompletion();
+          while ThreadIsActive() do // check for stop, externalstop, terminate
+          begin
+            Run(); //descendant's code
+            DoOnRunCompletion();
 
-              case fStartOption of
-              teRepeatRun:
-                begin
-                  //loop
-                end;
-              teRunThenSuspend:
-                begin
-                  SuspendThread(tsSuspendPending_RunOnceComplete);
-                  Break;
-                end;
-              teRunThenFree:
-                begin
-                  FreeOnTerminate := True;
-                  Terminate();
-                  Break;
-                end;
-              else
-                begin
-                  raise Exception.Create('Invalid StartOption detected in Execute()');
-                end;
+            case fStartOption of
+            teRepeatRun:
+              begin
+                //loop
+              end;
+            teRunThenSuspend:
+              begin
+                SuspendThread(tsSuspendPending_RunOnceComplete);
+                Break;
+              end;
+            teRunThenFree:
+              begin
+                FreeOnTerminate := True;
+                Terminate();
+                Break;
               end;
             end;
-          finally
-            AfterRun();
-          end;
+          end; //while ThreadIsActive()
         finally
-          if vCoInitCalled then
-          begin
-            CoUnInitialize();
-          end;
+          AfterRun();
         end;
-      end; //while not ShouldTerminate()
-    except
-      on E:Exception do
-      begin
-        if Assigned(OnException) then
+      finally
+        if fRequireCoinitialize then
         begin
-          OnException(self, E);
+          //ensure this is called if thread is to be frozen
+          CoUnInitialize();
         end;
-        Terminate();
       end;
+
+      WaitForResume;
+      // -- RESUME -- thread
+      //Note: Only two reasons to wake up a suspended thread:
+      //1: We are going to terminate it
+      //2: we want it to restart doing work
+      //+ Programmer hits stop twice without Starting protected in Stop()
+    end; //while not Terminated
+  except
+    on E:Exception do
+    begin
+      fTrappedException := E;
+      DoOnException();
     end;
-  finally
-    //since we have Resumed() this thread, we will wait until this event is
-    //triggered before free'ing.
-    fExecDoneSignal.SetEvent();
   end;
 end;
 
 
-procedure T5xThread.Suspending();
+procedure T5xThread.WaitForResume();
 begin
   fStateChangeLock.Lock();
   try
@@ -245,13 +216,18 @@ begin
     begin
       fThreadState := tsSuspended_RunOnceCompleted;
     end;
+
+    fResumeSignal.ResetEvent();
+    fAbortableSleepEvent.ResetEvent();
   finally
     fStateChangeLock.Unlock();
   end;
+
+  WaitForHandle(fResumeSignal.Handle);
 end;
 
 
-procedure T5xThread.Resumed();
+procedure T5xThread.ThreadHasResumed();
 begin
   fAbortableSleepEvent.ResetEvent();
   fResumeSignal.ResetEvent();
@@ -278,63 +254,62 @@ end;
 
 
 function T5xThread.Start(const pExecOption:T5xThreadExecOptions=teRepeatRun):Boolean;
-var
-  vNeedToWakeFromSuspendedCreationState:Boolean;
 begin
-  vNeedToWakeFromSuspendedCreationState := False;
+  if fStateChangeLock.TryLock() then
+  begin
+    try
+      StartOption := pExecOption;
 
-  fStateChangeLock.Lock();
-  try
-    StartOption := pExecOption;
-
-    Result := CanBeStarted();
-    if Result then
-    begin
-      if (fThreadState = tsSuspended_NotYetStarted) then
+      Result := CanBeStarted();
+      if Result then
       begin
-        //Resumed() will normally be called in the Exec loop but since we
-        //haven't started yet, we need to do it here the first time only.
-        Resumed();
-        vNeedToWakeFromSuspendedCreationState := True;
+        if fThreadState = tsSuspended_NotYetStarted then
+        begin
+          fThreadState := tsActive;
+          //We haven't started Exec loop at all yet
+          //Since we start all threads in suspended state, we need one initial Resume()
+         {$IFDEF RESUME_DEPRECATED}
+           inherited Start();
+         {$ELSE}
+           Resume();
+         {$ENDIF}
+        end
+        else
+        begin
+          fThreadState := tsActive;
+          //we're waiting on Exec, wake up and continue processing
+          fResumeSignal.SetEvent();
+        end;
       end;
-
-      fThreadState := tsActive;
-
-      //Resume();
-      if vNeedToWakeFromSuspendedCreationState then
-      begin
-        //We haven't started Exec loop at all yet
-        //Since we start all threads in suspended state, we need one initial Resume()
-       {$IFDEF RESUME_DEPRECATED}
-         inherited Start();
-       {$ELSE}
-         Resume();
-       {$ENDIF}
-      end
-      else
-      begin
-        //we're waiting on Exec, wake up and continue processing
-        fResumeSignal.SetEvent();
-      end;
+    finally
+      fStateChangeLock.Unlock();
     end;
-  finally
-    fStateChangeLock.Unlock();
+  end
+  else //thread is not asleep
+  begin
+    Result := False;
   end;
 end;
 
 
 function T5xThread.Stop():Boolean;
 begin
-  if ThreadIsActive() then
-  begin
-    Result := True;
-    SuspendThread(tsSuspendPending_StopRequestReceived);
-  end
-  else
-  begin
-    Result := False;
+  fStateChangeLock.Lock();
+  try
+    if ThreadIsActive() then
+    begin
+      Result := True;
+      SuspendThread(tsSuspendPending_StopRequestReceived);
+    end
+    else
+    begin
+      Result := False;
+    end;
+  finally
+    fStateChangeLock.Unlock();
   end;
 end;
+
 
 procedure T5xThread.SuspendThread(const pReason:T5xThreadState);
 begin
@@ -350,15 +325,37 @@ end;
 
 procedure T5xThread.Sync_CallOnRunCompletion();
 begin
-  if Assigned(fOnRunCompletion) then fOnRunCompletion(Self);
+  if not Terminated then
+  begin
+    fOnRunCompletion(Self);
+  end;
 end;
 
 
 procedure T5xThread.DoOnRunCompletion();
 begin
-  if Assigned(fOnRunCompletion) then CallSynchronize(Sync_CallOnRunCompletion);
+  if Assigned(fOnRunCompletion) then
+  begin
+    CallSynchronize(Sync_CallOnRunCompletion);
+  end;
 end;
 
+procedure T5xThread.Sync_CallOnException();
+begin
+  if not Terminated then
+  begin
+    fOnException(self, fTrappedException);
+  end;
+end;
+
+procedure T5xThread.DoOnException();
+begin
+  if Assigned(fOnException) then
+  begin
+    CallSynchronize(Sync_CallOnException);
+  end;
+  fTrappedException := nil;
+end;
 
 function T5xThread.GetThreadState():T5xThreadState;
 begin
@@ -381,42 +378,49 @@ end;
 
 function T5xThread.CanBeStarted():Boolean;
 begin
-  Result := (ThreadState in [tsSuspended_NotYetStarted,
-                             tsSuspended_ManuallyStopped,
-                             tsSuspended_RunOnceCompleted]);
+  if fStateChangeLock.TryLock() then
+  begin
+    try
+      Result := (not Terminated) and
+                (fThreadState in [tsSuspended_NotYetStarted,
+                                  tsSuspended_ManuallyStopped,
+                                  tsSuspended_RunOnceCompleted]);
+
+    finally
+      fStateChangeLock.UnLock();
+    end;
+  end
+  else //thread isn't asleep
+  begin
+    Result := False;
+  end;
 end;
 
 
 function T5xThread.ThreadIsActive():Boolean;
 begin
-  Result := (ThreadState = tsActive);
+  Result := (not Terminated) and (ThreadState = tsActive);
 end;
 
 
 procedure T5xThread.Sleep(const pSleepTimeMS:Integer);
 begin
-  fAbortableSleepEvent.WaitFor(pSleepTimeMS);
-end;
-
-
-procedure T5xThread.CallSynchronize(Method: TThreadMethod);
-begin
-  if ThreadIsActive() then
+  if not Terminated then
   begin
-    Synchronize(Method);
+    fAbortableSleepEvent.WaitFor(pSleepTimeMS);
   end;
 end;
 
 
-function T5xThread.ShouldTerminate():Boolean;
+procedure T5xThread.CallSynchronize(pMethod:TThreadMethod);
 begin
-  Result := Terminated or
-            (ThreadState in [tsTerminationPending_DestroyInProgress, tsTerminated]);
+  Synchronize(pMethod);
 end;
+
 
 procedure T5xThread.Sync_CallOnReportProgress();
 begin
-  if Assigned(fOnReportProgress) then
+  if not Terminated then
   begin
     fOnReportProgress(fProgressTextToReport);
   end;
@@ -425,7 +429,7 @@ end;
 
 procedure T5xThread.ReportProgress(const pAnyProgressText:string);
 begin
-  if Assigned(fOnReportProgress) and ThreadIsActive then
+  if Assigned(fOnReportProgress) then
   begin
     fProgressTextToReport := pAnyProgressText;
     CallSynchronize(Sync_CallOnReportProgress);
@@ -435,27 +439,31 @@ end;
 
 function T5xThread.WaitForHandle(const pHandle:THandle; const pTimeout:Cardinal=INFINITE):Boolean;
 var
-  vWaitForEventHandles:array[0..2] of THandle;
+  vWaitForEventHandles:array[0..1] of THandle;
   vWaitForResponse:DWORD;
 begin
   Result := False;
   vWaitForEventHandles[0] := pHandle;   //initially for: fResumeSignal.Handle;
-  vWaitForEventHandles[1] := fTerminateSignal.Handle;
-  vWaitForEventHandles[2] := fAbortableSleepEvent.Handle;
-  vWaitForResponse := WaitForMultipleObjects(3, @vWaitForEventHandles[0], False, pTimeout);  //can change timeout and repeat/until Terminated or (vWaitResponse = WAIT_OBJECT_0)
-  case vWaitForResponse of
-  WAIT_OBJECT_0: Result := True;  //initially for Resume
-  WAIT_OBJECT_0 + 1: Terminate();
-  WAIT_OBJECT_0 + 2: fAbortableSleepEvent.ResetEvent(); //likely a stop received while we are waiting for an external handle
-  WAIT_FAILED:
-     begin
-       {$IFDEF DELPHI6_UP}
-       RaiseLastOSError; 
-       {$ELSE}
-       RaiseLastWin32Error;
-       {$ENDIF}
-     end;
+  vWaitForEventHandles[1] := fAbortableSleepEvent.Handle;
+
+  if not Terminated then
+  begin
+    vWaitForResponse := WaitForMultipleObjects(2, @vWaitForEventHandles[0], False, pTimeout);  //can change timeout and repeat/until Terminated or (vWaitResponse = WAIT_OBJECT_0)
+
+    case vWaitForResponse of
+    WAIT_OBJECT_0: Result := True;  //initially for Resume, but also usable by descendants while in their Run()
+    WAIT_OBJECT_0 + 2: fAbortableSleepEvent.ResetEvent(); //likely a stop received while we are waiting for an external handle
+    WAIT_FAILED:
+       begin
+         {$IFDEF DELPHI6_UP}
+         RaiseLastOSError;
+         {$ELSE}
+         RaiseLastWin32Error;
+         {$ENDIF}
+       end;
+    end;
   end;
 end;
+
 
 end.
