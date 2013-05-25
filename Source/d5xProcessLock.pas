@@ -16,6 +16,8 @@ IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other
 dealings in this Software without prior written authorization of the copyright holder.
 *)
+
+{$I d5x.inc}
 unit d5xProcessLock;
 
 interface
@@ -26,12 +28,17 @@ type
   T5xProcessResourceLock = class(TObject)
   protected
     fProcessWideLock:TRTLCriticalSection;
+    {$IFNDEF DELPHIXE2_UP}
+    //http://delphitools.info/2011/11/30/fixing-tcriticalsection/
+    fCacheLineFiller:array[0..95] of Byte;
+    {$ENDIF}
   public
     constructor Create();
     destructor Destroy(); override;
 
     procedure Lock();
     procedure Unlock();
+    
     function TryLock():Boolean;
   end;
 
