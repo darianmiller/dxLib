@@ -51,6 +51,7 @@ type
 
 
 
+  //A TThread that can be managed (started/stopped) externally
   T5xThread = class(TThread)
   private
     fThreadState:T5xThreadState;
@@ -90,13 +91,13 @@ type
 
     property StartOption:T5xThreadExecOptions read fStartOption write fStartOption;
     property RequireCoinitialize:Boolean read fRequireCoinitialize write fRequireCoinitialize;
-    function WaitForHandle(const pHandle:THandle; const pTimeout:Cardinal=INFINITE):Boolean;
+    function WaitForHandle(const pHandle:THandle):Boolean;
   public
     constructor Create(); virtual;
     destructor Destroy(); override;
 
     function Start(const pExecOption:T5xThreadExecOptions=teRepeatRun):Boolean;
-    function Stop():Boolean;  //not intended for use if StartOption is RunThenFree
+    function Stop():Boolean;
 
     function CanBeStarted():Boolean;
     function ThreadIsActive():Boolean;
@@ -110,30 +111,41 @@ type
 implementation
 
 uses
-  ActiveX;
+  ActiveX,
+  d5xWinApi;
 
 
 constructor T5xThread.Create();
-const
-  ONSTATE = True;
 begin
-  inherited Create(True); //We always create suspended, user must call .Start()
+  inherited Create(True); //We always create suspended, user must always call Start()
   fThreadState := tsSuspended_NotYetStarted;
   fStateChangeLock := T5xProcessResourceLock.Create();
   fAbortableSleepEvent := TEvent.Create(nil, True, False, '');
   fResumeSignal := TEvent.Create(nil, True, False, '');
 end;
 
+
 destructor T5xThread.Destroy();
 begin
-  {$IFDEF VER130} //Workaround for Delphi5 issue of free'ing a non-started thread created in suspended mode
   if fThreadState = tsSuspended_NotYetStarted then
   begin
+    //Workaround for issue of freeing a non-started thread
+    //that was created in suspended mode
     fAwakeToFreeEvent := TEvent.Create(nil, True, False, '');
-    Start();
-    fAwakeToFreeEvent.WaitFor(INFINITE);
+    try
+      Start();
+      if GetCurrentThreadID = MainThreadID then
+      begin
+        WaitWithMessageLoop(fAwakeToFreeEvent.Handle, INFINITE);
+      end
+      else
+      begin
+        fAwakeToFreeEvent.WaitFor(INFINITE);
+      end;
+    finally
+      FreeAndNil(fAwakeToFreeEvent);
+    end;
   end;
-  {$ENDIF}
   fAbortableSleepEvent.SetEvent();
   fResumeSignal.SetEvent();
   inherited;
@@ -148,7 +160,7 @@ begin
   try
     if Assigned(fAwakeToFreeEvent) then
     begin
-      //(D5 fix) We've awoken a thread created in Suspend mode just to free it
+      //We've awoken a thread created in Suspend mode simply to free it
       fAwakeToFreeEvent.SetEvent();
       Terminate();
       Exit;
@@ -203,7 +215,6 @@ begin
       //Note: Only two reasons to wake up a suspended thread:
       //1: We are going to terminate it
       //2: we want it to restart doing work
-      //+ Programmer hits stop twice without Starting protected in Stop()
     end; //while not Terminated
   except
     on E:Exception do
@@ -305,19 +316,28 @@ end;
 
 function T5xThread.Stop():Boolean;
 begin
-  fStateChangeLock.Lock();
-  try
-    if ThreadIsActive() then
-    begin
-      Result := True;
-      SuspendThread(tsSuspendPending_StopRequestReceived);
-    end
-    else
-    begin
-      Result := False;
+  if StartOption <> teRunThenFree then
+  begin
+    fStateChangeLock.Lock();
+    try
+      if ThreadIsActive() then
+      begin
+        Result := True;
+        SuspendThread(tsSuspendPending_StopRequestReceived);
+      end
+      else
+      begin
+        Result := False;
+      end;
+    finally
+      fStateChangeLock.Unlock();
     end;
-  finally
-    fStateChangeLock.Unlock();
+  end
+  else
+  begin
+    //Never allowed to stop a FreeOnTerminate thread
+    //Cannot control thread termination from outside
+    Result := False;
   end;
 end;
 
@@ -368,6 +388,7 @@ begin
   fTrappedException := nil;
 end;
 
+
 function T5xThread.GetThreadState():T5xThreadState;
 begin
   fStateChangeLock.Lock();
@@ -389,6 +410,14 @@ end;
 
 function T5xThread.CanBeStarted():Boolean;
 begin
+  if Assigned(fAwakeToFreeEvent) then
+  begin
+    //special case - wake up suspended thread simply to shutdown/free
+    Result := True;
+    Exit;
+  end;
+
+
   if fStateChangeLock.TryLock() then
   begin
     try
@@ -448,21 +477,23 @@ begin
 end;
 
 
-function T5xThread.WaitForHandle(const pHandle:THandle; const pTimeout:Cardinal=INFINITE):Boolean;
+function T5xThread.WaitForHandle(const pHandle:THandle):Boolean;
+const
+  WaitForAll = False;
+  IterateTimeOutMilliseconds = 200;
 var
   vWaitForEventHandles:array[0..1] of THandle;
-  vWaitForResponse:DWORD;
+  vWaitForResponse:DWord;
 begin
   Result := False;
   vWaitForEventHandles[0] := pHandle;   //initially for: fResumeSignal.Handle;
   vWaitForEventHandles[1] := fAbortableSleepEvent.Handle;
-
-  if not Terminated then
+  while not Terminated do
   begin
-    vWaitForResponse := WaitForMultipleObjects(2, @vWaitForEventHandles[0], False, pTimeout);  //can change timeout and repeat/until Terminated or (vWaitResponse = WAIT_OBJECT_0)
-
+    vWaitForResponse := WaitForMultipleObjects(2, @vWaitForEventHandles[0], WaitForAll, IterateTimeOutMilliseconds);
     case vWaitForResponse of
-    WAIT_OBJECT_0: Result := True;  //initially for Resume, but also usable by descendants while in their Run()
+    WAIT_TIMEOUT: Continue;
+    WAIT_OBJECT_0: Result := True;  //initially for Resume, but also for descendants to use
     WAIT_OBJECT_0 + 1: fAbortableSleepEvent.ResetEvent(); //likely a stop received while we are waiting for an external handle
     WAIT_FAILED:
        begin
