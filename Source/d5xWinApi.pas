@@ -24,7 +24,10 @@ uses
   Windows;
 
   //Waits for signals to fire while processing pending message queue
-  function WaitWithMessageLoop(const pHandleToWaitOn:THandle; const pMaxTimeToWaitMS:Integer=INFINITE):Boolean;
+  function WaitWithMessageLoop(const pHandleToWaitOn:THandle; const pMaxTimeToWaitMS:DWord=INFINITE):Boolean;
+
+  procedure SendMessageToForm(const pDestination:THandle; const pMessage:String; const pMessageType:DWord=0);
+  function ValidHandleValue(const pHandle:THandle):Boolean;
 
 
 implementation
@@ -32,13 +35,13 @@ uses
   Messages;
 
 
-function WaitWithMessageLoop(const pHandleToWaitOn:THandle; const pMaxTimeToWaitMS:Integer=INFINITE):Boolean;
+function WaitWithMessageLoop(const pHandleToWaitOn:THandle; const pMaxTimeToWaitMS:DWord=INFINITE):Boolean;
 const
   WaitForAll = False;
   InitialTimeOutMS = 0;
   IterateTimeOutMS = 200;
 var
-  vTimeSpentWaitingMS:Integer;
+  vTimeSpentWaitingMS:DWord;
   vReturnVal:DWord;
   Msg:TMsg;
   H:THandle;
@@ -114,6 +117,24 @@ begin
       Exit;
     end;
   end;
+end;
+
+
+//http://blogs.msdn.com/b/oldnewthing/archive/2004/03/02/82639.aspx
+function ValidHandleValue(const pHandle:THandle):Boolean;
+begin
+  Result := (pHandle <> INVALID_HANDLE_VALUE) and (pHandle <> 0);
+end;
+
+
+procedure SendMessageToForm(const pDestination:THandle; const pMessage:String; const pMessageType:DWord=0);
+var
+  vData:TCopyDataStruct;
+begin
+  vData.dwData := pMessageType;
+  vData.cbData := Length(pMessage)*SizeOf(Char);
+  vData.lpData := PChar(pMessage);
+  SendMessage(pDestination, WM_COPYDATA, wParam(pDestination), lParam(@vData));
 end;
 
 
