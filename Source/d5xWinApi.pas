@@ -127,6 +127,33 @@ begin
 end;
 
 
+(*
+1) Register public custom Message Type(s) with system:
+  MyCustomMessageTYpe:DWord = 0;
+
+  initialization  //or on main form creation, etc.
+    MyCustomMessageType := RegisterWindowMessage('D5X_CustomMessage');
+
+2) Register to receive WM_COPYDATA messages on a form
+  procedure WMCopyData(var Msg:TWMCopyData); message WM_COPYDATA;
+
+  procedure TForm1.WMCopyData(var Msg: TWMCopyData);
+  var
+    vMessageString:String;
+  begin
+    if Msg.CopyDataStruct.dwData = MyCustomMessageType then //should filter on your custom message type
+    begin
+      SetString(vMessageString, PChar(Msg.CopyDataStruct.lpData), Msg.CopyDataStruct.cbData div SizeOf(Char));
+      ShowMessage(vMessageString); //do something with received message
+    end
+  end;
+
+3) Send the form a message
+   Can be from a background thread, from the same form, from a different form,
+   or even from a different process
+
+  SendMessageToForm(H, 'Hello', MyCustomMessageType);
+*)
 procedure SendMessageToForm(const pDestination:THandle; const pMessage:String; const pMessageType:DWord=0);
 var
   vData:TCopyDataStruct;
