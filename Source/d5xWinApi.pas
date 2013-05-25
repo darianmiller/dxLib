@@ -26,7 +26,7 @@ uses
   //Waits for signals to fire while processing pending message queue
   function WaitWithMessageLoop(const pHandleToWaitOn:THandle; const pMaxTimeToWaitMS:DWord=INFINITE):Boolean;
 
-  procedure SendMessageToForm(const pDestination:THandle; const pMessage:String; const pMessageType:DWord=0);
+  function SendMessageToForm(const pDestination:THandle; const pMessage:String; const pMessageType:DWord=0):LRESULT;
   function ValidHandleValue(const pHandle:THandle):Boolean;
 
 
@@ -144,24 +144,29 @@ end;
     if Msg.CopyDataStruct.dwData = MyCustomMessageType then //should filter on your custom message type
     begin
       SetString(vMessageString, PChar(Msg.CopyDataStruct.lpData), Msg.CopyDataStruct.cbData div SizeOf(Char));
-      ShowMessage(vMessageString); //do something with received message
+
+      //do something with received message
+      ShowMessage(vMessageString);
+      Msg.Result := 13013;  //can optionally send a custom Result code back to Sender
     end
   end;
 
 3) Send the form a message
    Can be from a background thread, from the same form, from a different form,
-   or even from a different process
+   or even from a different process.
+   Return value is the optional Msg.Result code set by form processing the message (otherwise 0)
 
   SendMessageToForm(H, 'Hello', MyCustomMessageType);
 *)
-procedure SendMessageToForm(const pDestination:THandle; const pMessage:String; const pMessageType:DWord=0);
+function SendMessageToForm(const pDestination:THandle; const pMessage:String; const pMessageType:DWord=0):LRESULT;
 var
   vData:TCopyDataStruct;
 begin
   vData.dwData := pMessageType;
-  vData.cbData := Length(pMessage)*SizeOf(Char);
+  vData.cbData := (Length(pMessage)+1)*SizeOf(Char);
   vData.lpData := PChar(pMessage);
-  SendMessage(pDestination, WM_COPYDATA, wParam(pDestination), lParam(@vData));
+
+  Result := SendMessage(pDestination, WM_COPYDATA, wParam(pDestination), lParam(@vData));
 end;
 
 
