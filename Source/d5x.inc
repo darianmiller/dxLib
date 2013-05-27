@@ -124,6 +124,9 @@ dealings in this Software without prior written authorization of the copyright h
 {$ENDIF}
 
 
+{$IFDEF DELPHI2006_UP}
+  {$DEFINE SUPPORTS_REPORTMEMORYLEAKSONSHUTDOWN}
+{$ENDIF}
 {$IFDEF DELPHI2009_UP}
   {$DEFINE SUPPORTS_UNICODESTRING}
   //anon methods
