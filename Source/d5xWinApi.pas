@@ -21,18 +21,17 @@ unit d5xWinApi;
 
 interface
 uses
-  Windows;
+  Windows, Messages;
 
   //Waits for signals to fire while processing pending message queue
   function WaitWithMessageLoop(const pHandleToWaitOn:THandle; const pMaxTimeToWaitMS:DWord=INFINITE):Boolean;
 
   function SendMessageToForm(const pDestination:THandle; const pMessage:String; const pMessageType:DWord=0):LRESULT;
   function ValidHandleValue(const pHandle:THandle):Boolean;
+  function GetWMCopyDataString(const pMsg:TWMCopyData):String;
 
 
 implementation
-uses
-  Messages;
 
 
 function WaitWithMessageLoop(const pHandleToWaitOn:THandle; const pMaxTimeToWaitMS:DWord=INFINITE):Boolean;
@@ -167,6 +166,12 @@ begin
   vData.lpData := PChar(pMessage);
 
   Result := SendMessage(pDestination, WM_COPYDATA, wParam(pDestination), lParam(@vData));
+end;
+
+
+function GetWMCopyDataString(const pMsg:TWMCopyData):String;
+begin
+  SetString(Result, PChar(pMsg.CopyDataStruct.lpData), pMsg.CopyDataStruct.cbData div SizeOf(Char));
 end;
 
 
