@@ -492,9 +492,20 @@ begin
   begin
     vWaitForResponse := WaitForMultipleObjects(2, @vWaitForEventHandles[0], WaitForAll, IterateTimeOutMilliseconds);
     case vWaitForResponse of
-    WAIT_TIMEOUT: Continue;
-    WAIT_OBJECT_0: Result := True;  //initially for Resume, but also for descendants to use
-    WAIT_OBJECT_0 + 1: fAbortableSleepEvent.ResetEvent(); //likely a stop received while we are waiting for an external handle
+    WAIT_TIMEOUT:
+      begin
+        Continue;
+      end;
+    WAIT_OBJECT_0:
+      begin
+        Result := True;  //initially for Resume, but also for descendants to use
+        Break;
+      end;
+    WAIT_OBJECT_0 + 1:
+      begin
+        fAbortableSleepEvent.ResetEvent(); //likely a stop received while we are waiting for an external handle
+        Break;
+      end;
     WAIT_FAILED:
        begin
          {$IFDEF DELPHI6_UP}
