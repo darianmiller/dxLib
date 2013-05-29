@@ -45,9 +45,9 @@ type
                     tsSuspendPending_RunOnceComplete,
                     tsTerminated);
 
-  T5xThreadExecOptions = (teRepeatRun,
-                          teRunThenSuspend,
-                          teRunThenFree);
+  T5xThreadExecOption = (teRepeatRun,
+                         teRunThenSuspend,
+                         teRunThenFree);
 
 
 
@@ -55,18 +55,22 @@ type
   T5xThread = class(TThread)
   private
     fThreadState:T5xThreadState;
+    fStateChangeLock:T5xProcessResourceLock;
+
+    fStartOption:T5xThreadExecOption;
+    fRequireCoinitialize:Boolean;
+
+    fProgressTextToReport:String;
     fTrappedException:Exception;
     fOnException:T5xExceptionEvent;
     fOnRunCompletion:T5xNotifyThreadEvent;
     fOnReportProgress:TGetStrProc;
-    fStateChangeLock:T5xProcessResourceLock;
+
     fAbortableSleepEvent:TEvent;
     fResumeSignal:TEvent;
     fAwakeToFreeEvent:TEvent;
-    fStartOption:T5xThreadExecOptions;
-    fProgressTextToReport:String;
-    fRequireCoinitialize:Boolean;
-    {$REGION 'Documentation'}
+
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private method, GetThreadState, is used to safely access the
     /// current thread state field which could be set at any time by
@@ -76,9 +80,9 @@ type
     /// Context Note:
     /// This is executed by outside threads OR by Self within its own context
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     function GetThreadState():T5xThreadState;
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private method, SuspendThread, is use to deactivate an active
     /// thread.
@@ -87,9 +91,9 @@ type
     /// Context Note:
     /// This is executed by outside threads OR by Self within its own context
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure SuspendThread(const pReason:T5xThreadState);
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private method, Sync_CallOnReportProgress, is meant to be protected
     /// within a Synchronize call to safely execute the optional
@@ -99,9 +103,9 @@ type
     /// Context Note:
     /// This is executed within the main thread's context
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure Sync_CallOnReportProgress();
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private method, Sync_CallOnRunCompletion, is meant to be protected
     /// within a Synchronize call to safely execute the optional OnRunCompletion
@@ -111,9 +115,9 @@ type
     /// Context Note:
     /// This is executed within the main thread's context
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure Sync_CallOnRunCompletion();
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private method, Sync_CallOnException, is meant to be protected
     /// within a Synchronize call to safely execute the optional OnException
@@ -123,9 +127,9 @@ type
     /// Context Note:
     /// This is executed within the main thread's context
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure Sync_CallOnException();
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private method, DoOnRunCompletion, sets up the call to properly
     /// execute the OnRunCompletion event via Syncrhonize.
@@ -134,9 +138,9 @@ type
     /// Context Note:
     /// This is called internally by Self within its own context.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure DoOnRunCompletion();
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private method, DoOnException, sets up the call to properly
     /// execute the OnException event via Syncrhonize.
@@ -145,9 +149,9 @@ type
     /// Context Note:
     /// This is called internally by Self within its own context.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure DoOnException();
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private method, CallSynchronize, calls the TThread.Synchronize
     /// method using the passed in TThreadMethod parameter.
@@ -156,10 +160,10 @@ type
     /// Context Note:
     /// This is called internally by Self within its own context.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure CallSynchronize(pMethod:TThreadMethod);
 
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private read-only property, ThreadState, calls GetThreadState to
     /// determine the current fThreadState
@@ -168,10 +172,10 @@ type
     /// Context Note:
     /// This is referenced by outside threads OR by Self within its own context
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     property ThreadState:T5xThreadState read GetThreadState;
   protected
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The protected method, Execute, overrides TThread()'s abstract Execute
     /// method with common logic for handling thread descendants.  Instead of
@@ -183,9 +187,9 @@ type
     /// Context Note:
     /// This is executed by Self within its own context.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure Execute(); override;
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The Virtual protected method, BeforeRun, is an empty stub versus an
     /// abstract method to allow for optional use by descendants.
@@ -195,23 +199,23 @@ type
     /// Context Note:
     /// This is called internally by Self within its own context.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure BeforeRun(); virtual;
 
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The virtual Abstract protected method, Run, should be overriden by descendant
-    /// classes to perform work. The option (T5xThreadExecOptions) passed to
+    /// classes to perform work. The option (T5xThreadExecOption) passed to
     /// Start controls how Run is executed.
     ///</summary>
     ///<remarks>
     /// Context Note:
     /// This is called internally by Self within its own context.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure Run(); virtual; ABSTRACT;
 
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The Virtual protected method, AfterRun, is an empty stub versus an
     /// abstract method to allow for optional use by descendants.
@@ -221,9 +225,9 @@ type
     /// Context Note:
     /// This is called internally by Self within its own context.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure AfterRun(); virtual;
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The Virtual protected method, WaitForResume, is called when this thread
     /// is about to go inactive.  If overriding this method, descendants should
@@ -233,9 +237,9 @@ type
     /// Context Note:
     /// This is called internally by Self within its own context.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure WaitForResume(); virtual;
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The Virtual protected method, ThreadHasResumed, is called when this
     /// thread is returning to active state
@@ -244,9 +248,9 @@ type
     /// Context Note:
     /// This is called internally by Self within its own context.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure ThreadHasResumed(); virtual;
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The Virtual protected method, ExternalRequestToStop, is an empty stub
     /// versus an abstract method to allow for optional use by descendants.
@@ -256,9 +260,9 @@ type
     /// This is referenced within the thread-safe GetThreadState call by either
     /// outside threads OR by Self within its own context
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     function ExternalRequestToStop():Boolean; virtual;
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The protected method, ReportProgress, is meant to be reused by
     /// descendant classes to allow for a built in way to communicate back to
@@ -269,9 +273,9 @@ type
     /// Optional. This is called by Self within its own context and only by
     /// descendants.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure ReportProgress(const pAnyProgressText:string);
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The protected method, Sleep, is a replacement for windows.sleep
     /// intended to be use by descendant classes to allow for responding to
@@ -282,9 +286,9 @@ type
     /// Optional. This is called by Self within its own context and only by
     /// descendants.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure Sleep(const pSleepTimeMS:Integer);
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The protected method, WaitForHandle, is available for
     /// descendants as a way to Wait for a specific signal while respecting the
@@ -296,10 +300,10 @@ type
     /// be also be used by descendants
     /// event)
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     function WaitForHandle(const pHandle:THandle):Boolean;
 
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The protected property, StartOption, is available for descendants to
     /// act in a hybrid manner (e.g. they can act as RepeatRun until a condition
@@ -310,11 +314,11 @@ type
     /// This property is referenced by outside threads OR by Self within its own
     /// context.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     //todo: different contexts reading and possibly writing - need to add protection
     //to prevent descendants from writing to this while thread is running
-    property StartOption:T5xThreadExecOptions read fStartOption write fStartOption;
-    {$REGION 'Documentation'}
+    property StartOption:T5xThreadExecOption read fStartOption write fStartOption;
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The protected property, RequireCoinitialize, is available for
     /// descendants as a flag to execute CoInitialize() before the thread Run
@@ -326,10 +330,10 @@ type
     /// be set once during Creation (as it is referenced before the BeforeRun()
     /// event so the only time to properly set this is in the constructor)
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     property RequireCoinitialize:Boolean read fRequireCoinitialize write fRequireCoinitialize;
   public
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// Public constructor for T5xThread, a descendant of TThread.
     /// Note: This constructor differs from TThread as all of these threads are
@@ -339,9 +343,9 @@ type
     /// Context Note:
     /// This is executed within the calling thread's context
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     constructor Create();
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// Public destructor for T5xThread, a descendant of TThread.
     /// Note: This will automatically terminate/waitfor thread as needed
@@ -351,10 +355,10 @@ type
     /// This is executed either within the calling thread's context
     /// OR within the threads context if auto-freeing itself
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     destructor Destroy(); override;
 
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The public method, Start, is used to activate the thread to begin work.
     /// All T5xThreads are created in suspended mode and must be activated to do
@@ -370,9 +374,9 @@ type
     /// OR during a Destroy if the thread is released but never started (Which
     /// temporarily starts the thread in order to properly shut it down.)
     ///</remarks>
-    {$ENDREGION}
-    function Start(const pExecOption:T5xThreadExecOptions=teRepeatRun):Boolean;
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
+    function Start(const pExecOption:T5xThreadExecOption=teRepeatRun):Boolean;
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The public method, Stop, is a thread-safe way to deactivate a running
     /// thread.  The thread will continue operation until it has a chance to
@@ -385,10 +389,10 @@ type
     /// Context Note:
     /// This is executed within the calling thread's context
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     function Stop():Boolean;
 
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The public method, CanBeStarted() is a thread-safe method to determine
     /// if the thread is able to be resumed at the moment.
@@ -397,9 +401,9 @@ type
     /// Context Note:
     /// This is executed within the calling thread's context
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     function CanBeStarted():Boolean;
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The public method, CanBeStarted() is a thread-safe method to determine
     /// if the thread is actively running the assigned task.
@@ -408,10 +412,10 @@ type
     /// Context Note:
     /// This is referenced by outside threads OR by Self within its own context
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     function ThreadIsActive():Boolean;
 
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The public event property, OnException, is executed when an error is
     /// trapped within the thread's Run loop
@@ -422,9 +426,9 @@ type
     /// The property should only be set while the thread is inactive as it is
     /// referenced by Self within its own context in a non-threadsafe manner.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     property OnException:T5xExceptionEvent read fOnException write fOnException;
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The public event property, OnRunCompletion, is executed as soon as the
     /// Run method exits
@@ -435,9 +439,9 @@ type
     /// The property should only be set while the thread is inactive as it is
     /// referenced by Self within its own context in a non-threadsafe manner.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     property OnRunCompletion:T5xNotifyThreadEvent read fOnRunCompletion write fOnRunCompletion;
-    {$REGION 'Documentation'}
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The public event property, OnReportProgress, is executed by descendant
     /// threads to report progress as needed back to the main thread
@@ -448,7 +452,7 @@ type
     /// The property should only be set while the thread is inactive as it is
     /// referenced by Self within its own context in a non-threadsafe manner.
     ///</remarks>
-    {$ENDREGION}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     property OnReportProgress:TGetStrProc read fOnReportProgress write fOnReportProgress;
   end;
 
@@ -509,7 +513,7 @@ begin
       Terminate();
       Exit;
     end;
-    
+
     while not Terminated do
     begin
       if fRequireCoinitialize then
@@ -525,7 +529,7 @@ begin
             Run(); //descendant's code
             DoOnRunCompletion();
 
-            case fStartOption of
+            case StartOption of
             teRepeatRun:
               begin
                 //loop
@@ -619,7 +623,7 @@ begin
 end;
 
 
-function T5xThread.Start(const pExecOption:T5xThreadExecOptions=teRepeatRun):Boolean;
+function T5xThread.Start(const pExecOption:T5xThreadExecOption=teRepeatRun):Boolean;
 begin
   if fStateChangeLock.TryLock() then
   begin
