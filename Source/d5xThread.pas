@@ -66,44 +66,389 @@ type
     fStartOption:T5xThreadExecOptions;
     fProgressTextToReport:String;
     fRequireCoinitialize:Boolean;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The private method, GetThreadState, is used to safely access the
+    /// current thread state field which could be set at any time by
+    /// this/another thread while being continuously read by this/another thread.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed by outside threads OR by Self within its own context
+    ///</remarks>
+    {$ENDREGION}
     function GetThreadState():T5xThreadState;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The private method, SuspendThread, is use to deactivate an active
+    /// thread.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed by outside threads OR by Self within its own context
+    ///</remarks>
+    {$ENDREGION}
     procedure SuspendThread(const pReason:T5xThreadState);
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The private method, Sync_CallOnReportProgress, is meant to be protected
+    /// within a Synchronize call to safely execute the optional
+    /// OnReportProgress event within the main thread's context
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed within the main thread's context
+    ///</remarks>
+    {$ENDREGION}
     procedure Sync_CallOnReportProgress();
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The private method, Sync_CallOnRunCompletion, is meant to be protected
+    /// within a Synchronize call to safely execute the optional OnRunCompletion
+    /// event within the main thread's context
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed within the main thread's context
+    ///</remarks>
+    {$ENDREGION}
     procedure Sync_CallOnRunCompletion();
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The private method, Sync_CallOnException, is meant to be protected
+    /// within a Synchronize call to safely execute the optional OnException
+    /// event within the main thread's context
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed within the main thread's context
+    ///</remarks>
+    {$ENDREGION}
     procedure Sync_CallOnException();
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The private method, DoOnRunCompletion, sets up the call to properly
+    /// execute the OnRunCompletion event via Syncrhonize.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is called internally by Self within its own context.
+    ///</remarks>
+    {$ENDREGION}
     procedure DoOnRunCompletion();
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The private method, DoOnException, sets up the call to properly
+    /// execute the OnException event via Syncrhonize.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is called internally by Self within its own context.
+    ///</remarks>
+    {$ENDREGION}
     procedure DoOnException();
-    property ThreadState:T5xThreadState read GetThreadState;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The private method, CallSynchronize, calls the TThread.Synchronize
+    /// method using the passed in TThreadMethod parameter.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is called internally by Self within its own context.
+    ///</remarks>
+    {$ENDREGION}
     procedure CallSynchronize(pMethod:TThreadMethod);
+
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The private read-only property, ThreadState, calls GetThreadState to
+    /// determine the current fThreadState
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is referenced by outside threads OR by Self within its own context
+    ///</remarks>
+    {$ENDREGION}
+    property ThreadState:T5xThreadState read GetThreadState;
   protected
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The protected method, Execute, overrides TThread()'s abstract Execute
+    /// method with common logic for handling thread descendants.  Instead of
+    /// typical Delphi behavior of overriding Execute(), descendants should
+    /// override the abstract Run() method and also check for ThreadIsActive
+    /// versus checking for Terminated.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed by Self within its own context.
+    ///</remarks>
+    {$ENDREGION}
     procedure Execute(); override;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The Virtual protected method, BeforeRun, is an empty stub versus an
+    /// abstract method to allow for optional use by descendants.
+    /// Typically, common Scatter/Gather type operations happen in Before/AfterRun
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is called internally by Self within its own context.
+    ///</remarks>
+    {$ENDREGION}
+    procedure BeforeRun(); virtual;
 
-    procedure BeforeRun(); virtual;      // Override as needed
-    procedure Run(); virtual; ABSTRACT;  // Must override
-    procedure AfterRun(); virtual;       // Override as needed
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The virtual Abstract protected method, Run, should be overriden by descendant
+    /// classes to perform work. The option (T5xThreadExecOptions) passed to
+    /// Start controls how Run is executed.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is called internally by Self within its own context.
+    ///</remarks>
+    {$ENDREGION}
+    procedure Run(); virtual; ABSTRACT;
 
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The Virtual protected method, AfterRun, is an empty stub versus an
+    /// abstract method to allow for optional use by descendants.
+    /// Typically, common Scatter/Gather type operations happen in Before/AfterRun
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is called internally by Self within its own context.
+    ///</remarks>
+    {$ENDREGION}
+    procedure AfterRun(); virtual;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The Virtual protected method, WaitForResume, is called when this thread
+    /// is about to go inactive.  If overriding this method, descendants should
+    /// peform desired work before the Inherited call.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is called internally by Self within its own context.
+    ///</remarks>
+    {$ENDREGION}
     procedure WaitForResume(); virtual;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The Virtual protected method, ThreadHasResumed, is called when this
+    /// thread is returning to active state
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is called internally by Self within its own context.
+    ///</remarks>
+    {$ENDREGION}
     procedure ThreadHasResumed(); virtual;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The Virtual protected method, ExternalRequestToStop, is an empty stub
+    /// versus an abstract method to allow for optional use by descendants.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is referenced within the thread-safe GetThreadState call by either
+    /// outside threads OR by Self within its own context
+    ///</remarks>
+    {$ENDREGION}
     function ExternalRequestToStop():Boolean; virtual;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The protected method, ReportProgress, is meant to be reused by
+    /// descendant classes to allow for a built in way to communicate back to
+    /// the main thread via a synchronized OnReportProgress event.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// Optional. This is called by Self within its own context and only by
+    /// descendants.
+    ///</remarks>
+    {$ENDREGION}
     procedure ReportProgress(const pAnyProgressText:string);
-
-    procedure Sleep(const pSleepTimeMS:Integer); //abortable sleep
-
-    property StartOption:T5xThreadExecOptions read fStartOption write fStartOption;
-    property RequireCoinitialize:Boolean read fRequireCoinitialize write fRequireCoinitialize;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The protected method, Sleep, is a replacement for windows.sleep
+    /// intended to be use by descendant classes to allow for responding to
+    /// thread suspension/termination if Sleep()ing.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// Optional. This is called by Self within its own context and only by
+    /// descendants.
+    ///</remarks>
+    {$ENDREGION}
+    procedure Sleep(const pSleepTimeMS:Integer);
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The protected method, WaitForHandle, is available for
+    /// descendants as a way to Wait for a specific signal while respecting the
+    /// Abortable Sleep signal on Stop requests, and also thread termination
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This method is referenced by Self within its own context and expected to
+    /// be also be used by descendants
+    /// event)
+    ///</remarks>
+    {$ENDREGION}
     function WaitForHandle(const pHandle:THandle):Boolean;
+
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The protected property, StartOption, is available for descendants to
+    /// act in a hybrid manner (e.g. they can act as RepeatRun until a condition
+    /// is hit and then set themselves to RunThenSuspend
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This property is referenced by outside threads OR by Self within its own
+    /// context.
+    ///</remarks>
+    {$ENDREGION}
+    //todo: different contexts reading and possibly writing - need to add protection
+    //to prevent descendants from writing to this while thread is running
+    property StartOption:T5xThreadExecOptions read fStartOption write fStartOption;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The protected property, RequireCoinitialize, is available for
+    /// descendants as a flag to execute CoInitialize() before the thread Run
+    /// loop and CoUnitialize() after the thread Run loop.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This property is referenced by Self within its own context and should
+    /// be set once during Creation (as it is referenced before the BeforeRun()
+    /// event so the only time to properly set this is in the constructor)
+    ///</remarks>
+    {$ENDREGION}
+    property RequireCoinitialize:Boolean read fRequireCoinitialize write fRequireCoinitialize;
   public
-    constructor Create(); virtual;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// Public constructor for T5xThread, a descendant of TThread.
+    /// Note: This constructor differs from TThread as all of these threads are
+    /// started suspended by default.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed within the calling thread's context
+    ///</remarks>
+    {$ENDREGION}
+    constructor Create();
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// Public destructor for T5xThread, a descendant of TThread.
+    /// Note: This will automatically terminate/waitfor thread as needed
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed either within the calling thread's context
+    /// OR within the threads context if auto-freeing itself
+    ///</remarks>
+    {$ENDREGION}
     destructor Destroy(); override;
 
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The public method, Start, is used to activate the thread to begin work.
+    /// All T5xThreads are created in suspended mode and must be activated to do
+    /// any work.
+    ///
+    /// Note: By default, the descendant's 'Run' method is continuously executed
+    /// (BeforeRun, Run, AfterRun is performed in a loop) This can be overriden
+    /// by overriding the pExecOption default parameter
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed within the calling thread's context either directly
+    /// OR during a Destroy if the thread is released but never started (Which
+    /// temporarily starts the thread in order to properly shut it down.)
+    ///</remarks>
+    {$ENDREGION}
     function Start(const pExecOption:T5xThreadExecOptions=teRepeatRun):Boolean;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The public method, Stop, is a thread-safe way to deactivate a running
+    /// thread.  The thread will continue operation until it has a chance to
+    /// check the active status.
+    /// Note:  Stop() is not intended for use if StartOption is teRunThenFree.
+    ///
+    /// This method will return without waiting for the thread to actually stop
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed within the calling thread's context
+    ///</remarks>
+    {$ENDREGION}
     function Stop():Boolean;
 
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The public method, CanBeStarted() is a thread-safe method to determine
+    /// if the thread is able to be resumed at the moment.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed within the calling thread's context
+    ///</remarks>
+    {$ENDREGION}
     function CanBeStarted():Boolean;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The public method, CanBeStarted() is a thread-safe method to determine
+    /// if the thread is actively running the assigned task.
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is referenced by outside threads OR by Self within its own context
+    ///</remarks>
+    {$ENDREGION}
     function ThreadIsActive():Boolean;
 
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The public event property, OnException, is executed when an error is
+    /// trapped within the thread's Run loop
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed within the main thread's context via Synchronize.
+    /// The property should only be set while the thread is inactive as it is
+    /// referenced by Self within its own context in a non-threadsafe manner.
+    ///</remarks>
+    {$ENDREGION}
     property OnException:T5xExceptionEvent read fOnException write fOnException;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The public event property, OnRunCompletion, is executed as soon as the
+    /// Run method exits
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed within the main thread's context via Synchronize.
+    /// The property should only be set while the thread is inactive as it is
+    /// referenced by Self within its own context in a non-threadsafe manner.
+    ///</remarks>
+    {$ENDREGION}
     property OnRunCompletion:T5xNotifyThreadEvent read fOnRunCompletion write fOnRunCompletion;
+    {$REGION 'Documentation'}
+    ///<summary>
+    /// The public event property, OnReportProgress, is executed by descendant
+    /// threads to report progress as needed back to the main thread
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed within the main thread's context via Synchronize.
+    /// The property should only be set while the thread is inactive as it is
+    /// referenced by Self within its own context in a non-threadsafe manner.
+    ///</remarks>
+    {$ENDREGION}
     property OnReportProgress:TGetStrProc read fOnReportProgress write fOnReportProgress;
   end;
 
@@ -129,8 +474,7 @@ destructor T5xThread.Destroy();
 begin
   if fThreadState = tsSuspended_NotYetStarted then
   begin
-    //Workaround for issue of freeing a non-started thread
-    //that was created in suspended mode
+    //Workaround for issue of freeing a non-started thread that was created in suspended mode
     fAwakeToFreeEvent := TEvent.Create(nil, True, False, '');
     try
       Start();
@@ -205,13 +549,13 @@ begin
       finally
         if fRequireCoinitialize then
         begin
-          //ensure this is called if thread is to be frozen
+          //ensure this is called if thread is to be suspended
           CoUnInitialize();
         end;
       end;
 
+      //Thread entering wait state
       WaitForResume;
-      // -- RESUME -- thread
       //Note: Only two reasons to wake up a suspended thread:
       //1: We are going to terminate it
       //2: we want it to restart doing work
