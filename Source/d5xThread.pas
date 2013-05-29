@@ -51,13 +51,22 @@ type
 
 
 
-  //A TThread that can be managed (started/stopped) externally
+  {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
+  ///<summary>
+  ///  A TThread that can be managed (started/stopped) externally
+  ///</summary>
+  ///<remarks>
+  /// 2 main differences from TThread:
+  ///   1):Descendants must override the Run() method.
+  ///   2):Replace checking for Terminated in descendant Run loop with ThreadIsActive()
+  ///</remarks>
+  {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
   T5xThread = class(TThread)
   private
     fThreadState:T5xThreadState;
     fStateChangeLock:T5xProcessResourceLock;
 
-    fStartOption:T5xThreadExecOption;
+    fStartOptionInt:Integer;
     fRequireCoinitialize:Boolean;
 
     fProgressTextToReport:String;
@@ -72,7 +81,7 @@ type
 
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
-    /// The private method, GetThreadState, is used to safely access the
+    /// The private getter method, GetThreadState, is used to safely access the
     /// current thread state field which could be set at any time by
     /// this/another thread while being continuously read by this/another thread.
     ///</summary>
@@ -82,6 +91,28 @@ type
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     function GetThreadState():T5xThreadState;
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
+    ///<summary>
+    /// The private getter method, GetStartOption, is used to read the current
+    /// value of the StartOption property
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed by outside threads OR by Self within its own context
+    ///</remarks>
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
+    function GetStartOption():T5xThreadExecOption;
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
+    ///<summary>
+    /// The private setter method, SetStartOption, is used to write the current
+    /// value of the StartOption property in an atomic transaction
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is executed by outside threads OR by Self within its own context
+    ///</remarks>
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
+    procedure SetStartOption(pVal:T5xThreadExecOption);
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private method, SuspendThread, is use to deactivate an active
@@ -312,12 +343,10 @@ type
     ///<remarks>
     /// Context Note:
     /// This property is referenced by outside threads OR by Self within its own
-    /// context.
+    /// context - which is the reason for InterlockedExchange in SetStartOption
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    //todo: different contexts reading and possibly writing - need to add protection
-    //to prevent descendants from writing to this while thread is running
-    property StartOption:T5xThreadExecOption read fStartOption write fStartOption;
+    property StartOption:T5xThreadExecOption read GetStartOption write SetStartOption;
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The protected property, RequireCoinitialize, is available for
@@ -753,6 +782,18 @@ begin
   finally
     fStateChangeLock.Unlock();
   end;
+end;
+
+
+function T5xThread.GetStartOption():T5xThreadExecOption;
+begin
+  Result := T5xThreadExecOption(fStartOptionInt);
+end;
+
+
+procedure T5xThread.SetStartOption(pVal:T5xThreadExecOption);
+begin
+  InterlockedExchange(fStartOptionInt, Ord(pVal));
 end;
 
 
