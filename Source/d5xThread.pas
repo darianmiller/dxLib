@@ -15,6 +15,8 @@ IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 
 Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other
 dealings in this Software without prior written authorization of the copyright holder.
+
+D5X Win32/Win64 Ready
 *)
 
 {$I d5x.inc}
@@ -34,7 +36,7 @@ type
 
   T5xThread = class;
   T5xNotifyThreadEvent = procedure(const pThread:T5xThread) of object;
-  T5xExceptionEvent = procedure(pSender:TObject; pException:Exception) of object;
+  T5xExceptionEvent = procedure(const pSender:TObject; const pException:Exception) of object;
 
 
   T5xThreadState = (tsActive,
@@ -112,7 +114,7 @@ type
     /// This is executed by outside threads OR by Self within its own context
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    procedure SetStartOption(pVal:T5xThreadExecOption);
+    procedure SetStartOption(const pVal:T5xThreadExecOption);
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private method, SuspendThread, is use to deactivate an active
@@ -192,7 +194,7 @@ type
     /// This is called internally by Self within its own context.
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    procedure CallSynchronize(pMethod:TThreadMethod);
+    procedure CallSynchronize(const pMethod:TThreadMethod);
 
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
@@ -305,7 +307,7 @@ type
     /// descendants.
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    procedure ReportProgress(const pAnyProgressText:string);
+    procedure ReportProgress(const pAnyProgressText:String);
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The protected method, Sleep, is a replacement for windows.sleep
@@ -496,6 +498,7 @@ uses
 constructor T5xThread.Create();
 begin
   inherited Create(True); //We always create suspended, user must always call Start()
+
   fThreadState := tsSuspended_NotYetStarted;
   fStateChangeLock := T5xProcessResourceLock.Create();
   fAbortableSleepEvent := TEvent.Create(nil, True, False, '');
@@ -523,9 +526,12 @@ begin
       FreeAndNil(fAwakeToFreeEvent);
     end;
   end;
+
+  Terminate();
   fAbortableSleepEvent.SetEvent();
   fResumeSignal.SetEvent();
   inherited;
+
   fStateChangeLock.Free();
   fResumeSignal.Free();
   fAbortableSleepEvent.Free();
@@ -534,7 +540,8 @@ end;
 
 procedure T5xThread.Execute();
 begin
-  try
+  try //except
+  
     if Assigned(fAwakeToFreeEvent) then
     begin
       //We've awoken a thread created in Suspend mode simply to free it
@@ -593,6 +600,7 @@ begin
       //1: We are going to terminate it
       //2: we want it to restart doing work
     end; //while not Terminated
+    
   except
     on E:Exception do
     begin
@@ -712,8 +720,8 @@ begin
   end
   else
   begin
-    //Never allowed to stop a FreeOnTerminate thread
-    //Cannot control thread termination from outside
+    //Never allowed to stop a FreeOnTerminate thread as we cannot properly
+    //control thread termination from the outside in that scenario.
     Result := False;
   end;
 end;
@@ -748,6 +756,7 @@ begin
   end;
 end;
 
+
 procedure T5xThread.Sync_CallOnException();
 begin
   if not Terminated then
@@ -755,6 +764,7 @@ begin
     fOnException(self, fTrappedException);
   end;
 end;
+
 
 procedure T5xThread.DoOnException();
 begin
@@ -774,7 +784,7 @@ begin
     begin
       fThreadState := tsTerminated;
     end
-    else if ExternalRequestToStop() then
+    else if ExternalRequestToStop() then  //used by central Thread Manager
     begin
       fThreadState := tsSuspendPending_StopRequestReceived;
     end;
@@ -791,7 +801,7 @@ begin
 end;
 
 
-procedure T5xThread.SetStartOption(pVal:T5xThreadExecOption);
+procedure T5xThread.SetStartOption(const pVal:T5xThreadExecOption);
 begin
   InterlockedExchange(fStartOptionInt, Ord(pVal));
 end;
@@ -841,7 +851,7 @@ begin
 end;
 
 
-procedure T5xThread.CallSynchronize(pMethod:TThreadMethod);
+procedure T5xThread.CallSynchronize(const pMethod:TThreadMethod);
 begin
   Synchronize(pMethod);
 end;
@@ -856,7 +866,7 @@ begin
 end;
 
 
-procedure T5xThread.ReportProgress(const pAnyProgressText:string);
+procedure T5xThread.ReportProgress(const pAnyProgressText:String);
 begin
   if Assigned(fOnReportProgress) then
   begin
@@ -868,7 +878,7 @@ end;
 
 function T5xThread.WaitForHandle(const pHandle:THandle):Boolean;
 const
-  WaitForAll = False;
+  WaitAllOption = False;
   IterateTimeOutMilliseconds = 200;
 var
   vWaitForEventHandles:array[0..1] of THandle;
@@ -877,9 +887,10 @@ begin
   Result := False;
   vWaitForEventHandles[0] := pHandle;   //initially for: fResumeSignal.Handle;
   vWaitForEventHandles[1] := fAbortableSleepEvent.Handle;
+
   while not Terminated do
   begin
-    vWaitForResponse := WaitForMultipleObjects(2, @vWaitForEventHandles[0], WaitForAll, IterateTimeOutMilliseconds);
+    vWaitForResponse := WaitForMultipleObjects(2, @vWaitForEventHandles[0], WaitAllOption, IterateTimeOutMilliseconds);
     case vWaitForResponse of
     WAIT_TIMEOUT:
       begin
@@ -904,7 +915,7 @@ begin
          {$ENDIF}
        end;
     end;
-  end;
+  end; //while not Terminated
 end;
 
 
