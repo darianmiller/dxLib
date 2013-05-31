@@ -27,6 +27,9 @@ interface
 uses
   Windows;
 
+const
+  DefSpinCount = 3800;
+
 type
   {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
   /// <summary>
@@ -43,6 +46,7 @@ type
   T5xProcessResourceLock = class(TObject)
   private
     fProcessWideLock:TRTLCriticalSection;
+    fSpinCount:DWord;
     {$IFDEF NODEF}{$REGION 'MultiCorePerformanceTweak'}{$ENDIF}
       {$IFNDEF DELPHIXE2_UP} //Addressed in XE2 and no longer needed
         {$HINTS OFF} //Ignore 'private symbol declared but never used'
@@ -50,9 +54,39 @@ type
         {$HINTS ON}
       {$ENDIF}
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
+
+    function GetSpinCount:DWord;
+    procedure SetSpinCount(const pValue:DWord);
   public
-    constructor Create();
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
+    /// <remarks>
+    ///   The DefSpinCount comes from a reference on MSDN
+    ///   http://msdn.microsoft.com/en-us/library/windows/desktop/ms686197(v=vs.85).aspx
+    ///   You can improve performance significantly by choosing a small spin
+    ///   count for a critical section of short duration. The heap manager uses
+    ///   a spin count of roughly 4000 for its per-heap critical sections. This
+    ///   gives great performance and scalability in almost all worst-case
+    ///   scenarios.
+    /// </remarks>
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
+    constructor Create(const pSpinCount:DWord=DefSpinCount);
     destructor Destroy(); override;
+
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
+    ///<summary>
+    /// The spin count for the critical section object.
+    ///</summary>
+    ///<remarks>
+    /// MSDN: On single-processor systems, the spin count is ignored and the
+    /// critical section spin count is set to zero (0). On multiprocessor
+    /// systems, if the critical section is unavailable, the calling thread
+    /// spins dwSpinCount times before performing a wait operation on a
+    /// semaphore associated with the critical section. If the critical section
+    /// becomes free during the spin operation, the calling thread avoids the
+    /// wait operation.
+    ///</remarks>
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
+    property SpinCount:DWord Read GetSpinCount Write SetSpinCount;
 
     procedure Lock();
     procedure Unlock();
@@ -64,10 +98,17 @@ type
 implementation
 
 
-constructor T5xProcessResourceLock.Create();
+constructor T5xProcessResourceLock.Create(const pSpinCount:DWord=DefSpinCount);
 begin
   inherited Create();
-  InitializeCriticalSection(fProcessWideLock);
+  if pSpinCount <= 0 then
+  begin
+    InitializeCriticalSection(fProcessWideLock);
+  end
+  else
+  begin
+    InitializeCriticalSectionAndSpinCount(fProcessWideLock, pSpinCount);
+  end;
 end;
 
 
@@ -93,6 +134,18 @@ end;
 function T5xProcessResourceLock.TryLock():Boolean;
 begin
   Result := TryEnterCriticalSection(fProcessWideLock);
+end;
+
+
+function T5xProcessResourceLock.GetSpinCount():DWord;
+begin
+  Result := fSpinCount;
+end;
+
+
+procedure T5xProcessResourceLock.SetSpinCount(const pValue:DWord);
+begin
+  fSpinCount := SetCriticalSectionSpinCount(fProcessWideLock, pValue);
 end;
 
 
