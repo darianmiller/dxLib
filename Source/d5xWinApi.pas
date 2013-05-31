@@ -15,20 +15,28 @@ IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 
 Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other
 dealings in this Software without prior written authorization of the copyright holder.
+
+As of May 2013, latest version available online at:
+  https://github.com/darianmiller/d5xlib
+
+D5X Win32/Win64 Ready
 *)
 
 unit d5xWinApi;
 
 interface
 uses
-  Windows, Messages;
+  Windows,
+  Messages;
 
   //Waits for signals to fire while processing pending message queue
   function WaitWithMessageLoop(const pHandleToWaitOn:THandle; const pMaxTimeToWaitMS:DWord=INFINITE):Boolean;
 
   function SendMessageToForm(const pDestination:THandle; const pMessage:String; const pMessageType:DWord=0):LRESULT;
-  function ValidHandleValue(const pHandle:THandle):Boolean;
+
+  //helper methods
   function GetWMCopyDataString(const pMsg:TWMCopyData):String;
+  function ValidHandleValue(const pHandle:THandle):Boolean;
 
 
 implementation
@@ -36,7 +44,7 @@ implementation
 
 function WaitWithMessageLoop(const pHandleToWaitOn:THandle; const pMaxTimeToWaitMS:DWord=INFINITE):Boolean;
 const
-  WaitForAll = False;
+  WaitAllOption = False;
   InitialTimeOutMS = 0;
   IterateTimeOutMS = 200;
 var
@@ -90,7 +98,7 @@ begin
     // Now we've dispatched all the messages in the queue
     // use MsgWaitForMultipleObjects to either tell us there are
     // more messages to dispatch, or that our object has been signalled.
-    vReturnVal := MsgWaitForMultipleObjects(1, H, WaitForAll, IterateTimeOutMS, QS_ALLINPUT);
+    vReturnVal := MsgWaitForMultipleObjects(1, H, WaitAllOption, IterateTimeOutMS, QS_ALLINPUT);
 
     if (vReturnVal = WAIT_OBJECT_0) then
     begin
@@ -119,6 +127,7 @@ begin
 end;
 
 
+//One blog article reference: Why are HANDLE return values so inconsistent
 //http://blogs.msdn.com/b/oldnewthing/archive/2004/03/02/82639.aspx
 function ValidHandleValue(const pHandle:THandle):Boolean;
 begin
@@ -169,6 +178,7 @@ begin
 end;
 
 
+//helper method to prevent having to type this syntax every time
 function GetWMCopyDataString(const pMsg:TWMCopyData):String;
 begin
   SetString(Result, PChar(pMsg.CopyDataStruct.lpData), pMsg.CopyDataStruct.cbData div SizeOf(Char));
