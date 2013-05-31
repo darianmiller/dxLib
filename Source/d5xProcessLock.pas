@@ -15,6 +15,9 @@ IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 
 Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other
 dealings in this Software without prior written authorization of the copyright holder.
+
+As of May 2013, latest version available online at:
+  https://github.com/darianmiller/d5xlib
 *)
 
 {$I d5x.inc}
@@ -25,20 +28,35 @@ uses
   Windows;
 
 type
+  {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
+  /// <summary>
+  ///   Wrapper around TRTLCriticalSection for protecting access to shared
+  ///   resources across multiple threads of a process
+  /// </summary>
+  /// <remarks>
+  ///   MSDN: The threads of a single process can use a critical section object
+  ///   for mutual-exclusion synchronization. There is no guarantee about the
+  ///   order that threads obtain ownership of the critical section. However,
+  ///   the system is fair to all threads.
+  /// </remarks>
+  {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
   T5xProcessResourceLock = class(TObject)
-  protected
+  private
     fProcessWideLock:TRTLCriticalSection;
-    {$IFNDEF DELPHIXE2_UP}
-    //http://delphitools.info/2011/11/30/fixing-tcriticalsection/
-    fCacheLineFiller:array[0..95] of Byte;
-    {$ENDIF}
+    {$IFDEF NODEF}{$REGION 'MultiCorePerformanceTweak'}{$ENDIF}
+      {$IFNDEF DELPHIXE2_UP} //Addressed in XE2 and no longer needed
+        {$HINTS OFF} //Ignore 'private symbol declared but never used'
+        fCacheLineFiller:array[0..95] of Byte; //see: http://delphitools.info/2011/11/30/fixing-tcriticalsection/
+        {$HINTS ON}
+      {$ENDIF}
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
   public
     constructor Create();
     destructor Destroy(); override;
 
     procedure Lock();
     procedure Unlock();
-    
+
     function TryLock():Boolean;
   end;
 
