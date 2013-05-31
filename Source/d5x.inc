@@ -15,6 +15,11 @@ IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 
 Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other
 dealings in this Software without prior written authorization of the copyright holder.
+
+As of May 2013, latest version available online at:
+  https://github.com/darianmiller/d5xlib
+
+D5X Win32/Win64 Ready
 *)
 
 {$IFDEF VER130}  //D5 Borland: Released 10th August 1999, Codename Argus
@@ -30,20 +35,20 @@ dealings in this Software without prior written authorization of the copyright h
   {$DEFINE DELPHI7_UP}
 {$ENDIF}
 //D8=DotNet Released 22nd December 2003, Codename Octane
-{$IFDEF VER170} //D9 Borland: Released 12th October 2004, Codename Diamondback
+{$IFDEF VER170} //D9-2005 Borland: Released 12th October 2004, Codename Diamondback
   {$DEFINE DELPHI5_UP}
   {$DEFINE DELPHI6_UP}
   {$DEFINE DELPHI7_UP}
   {$DEFINE DELPHI2005_UP}
 {$ENDIF}
-{$IFDEF VER180}  //D10 Borland: Released 23rd November 2005, Codename DeXter
+{$IFDEF VER180}  //D10-2006 Borland: Released 23rd November 2005, Codename DeXter
   {$DEFINE DELPHI5_UP}
   {$DEFINE DELPHI6_UP}
   {$DEFINE DELPHI7_UP}
   {$DEFINE DELPHI2005_UP}
   {$DEFINE DELPHI2006_UP}
 {$ENDIF}
-{$IFDEF VER185}  //D11 Codegear: Released 16th March 2007, Codename Spacely
+{$IFDEF VER185}  //D11-2007 Codegear: Released 16th March 2007, Codename Spacely
   {$DEFINE DELPHI5_UP}
   {$DEFINE DELPHI6_UP}
   {$DEFINE DELPHI7_UP}
@@ -51,7 +56,7 @@ dealings in this Software without prior written authorization of the copyright h
   {$DEFINE DELPHI2006_UP}
   {$DEFINE DELPHI2007_UP}
 {$ENDIF}
-{$IFDEF VER200}  //D12 Embarcadero: Released 25th August 2008, Codename Tiburon
+{$IFDEF VER200}  //D12-2009 Embarcadero: Released 25th August 2008, Codename Tiburon
   {$DEFINE DELPHI5_UP}
   {$DEFINE DELPHI6_UP}
   {$DEFINE DELPHI7_UP}
@@ -59,10 +64,9 @@ dealings in this Software without prior written authorization of the copyright h
   {$DEFINE DELPHI2006_UP}
   {$DEFINE DELPHI2007_UP}
   {$DEFINE DELPHI2009_UP}
-  {$DEFINE SUPPORTS_UNICODESTRING}
 {$ENDIF}
 //D13 skipped
-{$IFDEF VER210}  //D14 Embarcadero: Released 25th August 2009, Codename Weaver
+{$IFDEF VER210}  //D14-2010 Embarcadero: Released 25th August 2009, Codename Weaver
   {$DEFINE DELPHI5_UP}
   {$DEFINE DELPHI6_UP}
   {$DEFINE DELPHI7_UP}
@@ -72,7 +76,7 @@ dealings in this Software without prior written authorization of the copyright h
   {$DEFINE DELPHI2009_UP}
   {$DEFINE DELPHI2010_UP}
 {$ENDIF}
-{$IFDEF VER220}  //D15 Embarcadero: Released 30th August 2010, Codename Fulcrum
+{$IFDEF VER220}  //D15-XE Embarcadero: Released 30th August 2010, Codename Fulcrum
   {$DEFINE DELPHI5_UP}
   {$DEFINE DELPHI6_UP}
   {$DEFINE DELPHI7_UP}
@@ -83,7 +87,7 @@ dealings in this Software without prior written authorization of the copyright h
   {$DEFINE DELPHI2010_UP}
   {$DEFINE DELPHIXE_UP}
 {$ENDIF}
-{$IFDEF VER230}  //D16 Embarcadero: Released 1st September, 2011, Codename Pulsar
+{$IFDEF VER230}  //D16-XE2 Embarcadero: Released 1st September, 2011, Codename Pulsar
   {$DEFINE DELPHI5_UP}
   {$DEFINE DELPHI6_UP}
   {$DEFINE DELPHI7_UP}
@@ -95,7 +99,7 @@ dealings in this Software without prior written authorization of the copyright h
   {$DEFINE DELPHIXE_UP}
   {$DEFINE DELPHIXE2_UP}
 {$ENDIF}
-{$IFDEF VER240}  //D17 Embarcadero: Released 4th September, 2012, Codename WaterDragon
+{$IFDEF VER240}  //D17-XE3 Embarcadero: Released 4th September, 2012, Codename WaterDragon
   {$DEFINE DELPHI5_UP}
   {$DEFINE DELPHI6_UP}
   {$DEFINE DELPHI7_UP}
@@ -108,7 +112,7 @@ dealings in this Software without prior written authorization of the copyright h
   {$DEFINE DELPHIXE2_UP}
   {$DEFINE DELPHIXE3_UP}
 {$ENDIF}
-{$IFDEF VER250}  //D18 Embarcadero: Released 22nd April, 2013, Codename Quintessence
+{$IFDEF VER250}  //D18-XE4 Embarcadero: Released 22nd April, 2013, Codename Quintessence
   {$DEFINE DELPHI5_UP}
   {$DEFINE DELPHI6_UP}
   {$DEFINE DELPHI7_UP}
