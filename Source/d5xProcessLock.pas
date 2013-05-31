@@ -18,6 +18,8 @@ dealings in this Software without prior written authorization of the copyright h
 
 As of May 2013, latest version available online at:
   https://github.com/darianmiller/d5xlib
+
+D5X Win32/Win64 Ready.
 *)
 
 {$I d5x.inc}
