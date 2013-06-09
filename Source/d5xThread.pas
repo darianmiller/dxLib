@@ -16,6 +16,9 @@ IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other
 dealings in this Software without prior written authorization of the copyright holder.
 
+As of May 2013, latest version available online at:
+  https://github.com/darianmiller/d5xlib
+
 D5X Win32/Win64 Ready
 *)
 
