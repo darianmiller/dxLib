@@ -100,6 +100,7 @@ begin
     // more messages to dispatch, or that our object has been signalled.
     vReturnVal := MsgWaitForMultipleObjects(1, H, WaitAllOption, IterateTimeOutMS, QS_ALLINPUT);
 
+    Inc(vTimeSpentWaitingMS, IterateTimeOutMS);
     if (vReturnVal = WAIT_OBJECT_0) then
     begin
       // The event was signaled
@@ -114,7 +115,6 @@ begin
     else if (vReturnVal = WAIT_TIMEOUT) then
     begin
       // We hit our time limit, continue with the loop
-      Inc(vTimeSpentWaitingMS, IterateTimeOutMS);
       Continue;
     end
     else
