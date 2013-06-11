@@ -71,7 +71,7 @@ type
     fThreadState:T5xThreadState;
     fStateChangeLock:T5xProcessResourceLock;
 
-    fStartOptionInt:Integer;
+    fExecOptionInt:Integer;
     fRequireCoinitialize:Boolean;
 
     fProgressTextToReport:String;
@@ -98,26 +98,26 @@ type
     function GetThreadState():T5xThreadState;
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
-    /// The private getter method, GetStartOption, is used to read the current
-    /// value of the StartOption property
+    /// The private getter method, GetExecOption, is used to read the current
+    /// value of the ExecOption property
     ///</summary>
     ///<remarks>
     /// Context Note:
     /// This is executed by outside threads OR by Self within its own context
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    function GetStartOption():T5xThreadExecOption;
+    function GetExecOption():T5xThreadExecOption;
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
-    /// The private setter method, SetStartOption, is used to write the current
-    /// value of the StartOption property in an atomic transaction
+    /// The private setter method, SetExecOption, is used to write the current
+    /// value of the ExecOption property in an atomic transaction
     ///</summary>
     ///<remarks>
     /// Context Note:
     /// This is executed by outside threads OR by Self within its own context
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    procedure SetStartOption(const pVal:T5xThreadExecOption);
+    procedure SetExecOption(const pVal:T5xThreadExecOption);
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private method, SuspendThread, is use to deactivate an active
@@ -324,34 +324,20 @@ type
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     procedure Sleep(const pSleepTimeMS:Integer);
-    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
-    ///<summary>
-    /// The protected method, WaitForHandle, is available for
-    /// descendants as a way to Wait for a specific signal while respecting the
-    /// Abortable Sleep signal on Stop requests, and also thread termination
-    ///</summary>
-    ///<remarks>
-    /// Context Note:
-    /// This method is referenced by Self within its own context and expected to
-    /// be also be used by descendants
-    /// event)
-    ///</remarks>
-    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    function WaitForHandle(const pHandle:THandle):Boolean;
 
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
-    /// The protected property, StartOption, is available for descendants to
+    /// The protected property, ExecOption, is available for descendants to
     /// act in a hybrid manner (e.g. they can act as RepeatRun until a condition
     /// is hit and then set themselves to RunThenSuspend
     ///</summary>
     ///<remarks>
     /// Context Note:
     /// This property is referenced by outside threads OR by Self within its own
-    /// context - which is the reason for InterlockedExchange in SetStartOption
+    /// context - which is the reason for InterlockedExchange in SetExecOption
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    property StartOption:T5xThreadExecOption read GetStartOption write SetStartOption;
+    property ExecOption:T5xThreadExecOption read GetExecOption write SetExecOption;
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The protected property, RequireCoinitialize, is available for
@@ -415,7 +401,7 @@ type
     /// The public method, Stop, is a thread-safe way to deactivate a running
     /// thread.  The thread will continue operation until it has a chance to
     /// check the active status.
-    /// Note:  Stop() is not intended for use if StartOption is teRunThenFree.
+    /// Note:  Stop() is not intended for use if ExecOption is teRunThenFree.
     ///
     /// This method will return without waiting for the thread to actually stop
     ///</summary>
@@ -439,7 +425,7 @@ type
     function CanBeStarted():Boolean;
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
-    /// The public method, CanBeStarted() is a thread-safe method to determine
+    /// The public method, ThreadIsActive() is a thread-safe method to determine
     /// if the thread is actively running the assigned task.
     ///</summary>
     ///<remarks>
@@ -448,6 +434,21 @@ type
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
     function ThreadIsActive():Boolean;
+
+    {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
+    ///<summary>
+    /// The protected method, WaitForHandle, is available for
+    /// descendants as a way to Wait for a specific signal while respecting the
+    /// Abortable Sleep signal on Stop requests, and also thread termination
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This method is referenced by Self within its own context and expected to
+    /// be also be used by descendants
+    /// event)
+    ///</remarks>
+    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
+    function WaitForHandle(const pHandle:THandle):Boolean;
 
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
@@ -568,7 +569,7 @@ begin
             Run(); //descendant's code
             DoOnRunCompletion();
 
-            case StartOption of
+            case ExecOption of
             teRepeatRun:
               begin
                 //loop
@@ -668,7 +669,7 @@ begin
   if fStateChangeLock.TryLock() then
   begin
     try
-      StartOption := pExecOption;
+      ExecOption := pExecOption;
 
       Result := CanBeStarted();
       if Result then
@@ -704,7 +705,7 @@ end;
 
 function T5xThread.Stop():Boolean;
 begin
-  if StartOption <> teRunThenFree then
+  if ExecOption <> teRunThenFree then
   begin
     fStateChangeLock.Lock();
     try
@@ -798,15 +799,15 @@ begin
 end;
 
 
-function T5xThread.GetStartOption():T5xThreadExecOption;
+function T5xThread.GetExecOption():T5xThreadExecOption;
 begin
-  Result := T5xThreadExecOption(fStartOptionInt);
+  Result := T5xThreadExecOption(fExecOptionInt);
 end;
 
 
-procedure T5xThread.SetStartOption(const pVal:T5xThreadExecOption);
+procedure T5xThread.SetExecOption(const pVal:T5xThreadExecOption);
 begin
-  InterlockedExchange(fStartOptionInt, Ord(pVal));
+  InterlockedExchange(fExecOptionInt, Ord(pVal));
 end;
 
 
