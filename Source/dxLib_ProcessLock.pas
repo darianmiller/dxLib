@@ -16,14 +16,14 @@ IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other
 dealings in this Software without prior written authorization of the copyright holder.
 
-As of May 2013, latest version available online at:
-  https://github.com/darianmiller/d5xlib
+As of January 2016, latest version available online at:
+  https://github.com/darianmiller/dxLib
 
 D5X Win32/Win64 Ready.
 *)
 
-{$I d5x.inc}
-unit d5xProcessLock;
+{$I dxLib.inc}
+unit dxLib_ProcessLock;
 
 interface
 uses
@@ -45,7 +45,7 @@ type
   ///   the system is fair to all threads.
   /// </remarks>
   {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-  T5xProcessResourceLock = class(TObject)
+  TdxProcessResourceLock = class(TObject)
   private
     fProcessWideLock:TRTLCriticalSection;
     fSpinCount:DWord;
@@ -100,7 +100,7 @@ type
 implementation
 
 
-constructor T5xProcessResourceLock.Create(const pSpinCount:DWord=DefSpinCount);
+constructor TdxProcessResourceLock.Create(const pSpinCount:DWord=DefSpinCount);
 begin
   inherited Create();
   if pSpinCount <= 0 then
@@ -114,38 +114,38 @@ begin
 end;
 
 
-destructor T5xProcessResourceLock.Destroy();
+destructor TdxProcessResourceLock.Destroy();
 begin
   DeleteCriticalSection(fProcessWideLock);
   inherited Destroy();
 end;
 
 
-procedure T5xProcessResourceLock.Lock();
+procedure TdxProcessResourceLock.Lock();
 begin
   EnterCriticalSection(fProcessWideLock);
 end;
 
 
-procedure T5xProcessResourceLock.Unlock();
+procedure TdxProcessResourceLock.Unlock();
 begin
   LeaveCriticalSection(fProcessWideLock);
 end;
 
 
-function T5xProcessResourceLock.TryLock():Boolean;
+function TdxProcessResourceLock.TryLock():Boolean;
 begin
   Result := TryEnterCriticalSection(fProcessWideLock);
 end;
 
 
-function T5xProcessResourceLock.GetSpinCount():DWord;
+function TdxProcessResourceLock.GetSpinCount():DWord;
 begin
   Result := fSpinCount;
 end;
 
 
-procedure T5xProcessResourceLock.SetSpinCount(const pValue:DWord);
+procedure TdxProcessResourceLock.SetSpinCount(const pValue:DWord);
 begin
   fSpinCount := SetCriticalSectionSpinCount(fProcessWideLock, pValue);
 end;
