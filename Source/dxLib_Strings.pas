@@ -1,6 +1,5 @@
 (*
-Copyright (c) 2013 Darian Miller
-
+Copyright (c) 2016 Darian Miller
 All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal
@@ -18,8 +17,6 @@ dealings in this Software without prior written authorization of the copyright h
 
 As of January 2016, latest version available online at:
   https://github.com/darianmiller/dxLib
-
-D5-XE+ Win32/Win64 Ready
 *)
 
 unit dxLib_Strings;
@@ -27,23 +24,29 @@ unit dxLib_Strings;
 interface
 {$I dxLib.inc}
 
-type
-  TSysAnsiCharSet = set of AnsiChar;
 
-  function LowString():Integer;
-  function HighString(const pValue:String):Integer; overload;
+  function ByteLength(const aChar:Char):Integer; overload;
+  function ByteLength(const aString:String):Integer; overload;
   {$IFDEF DX_String_Is_UTF16}
-  function HighString(const pValue:AnsiString):Integer; overload;
+  function ByteLength(const aChar:AnsiChar):Integer; overload;
+  function ByteLength(const aString:AnsiString):Integer; overload;
   {$ENDIF}
+
+  {$IFNDEF DX_Supports_CharInSet}
+  type
+    TSysAnsiCharSet = set of AnsiChar;
+
+  function CharInSet(C:AnsiChar; const CharSet:TSysAnsiCharSet):Boolean;
+  {$ENDIF}
+
 
   function IsPrintableCharacter(const pChar:Char):Boolean; overload;
   {$IFDEF DX_String_Is_UTF16}
   function IsPrintableCharacter(const pChar:AnsiChar):Boolean; overload;
   {$ENDIF}
 
-  function CharInSet(C:AnsiChar; const CharSet:TSysAnsiCharSet):Boolean;
 
-  
+
   {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
   /// <summary>
   ///  Converts text into a form that contains only Unreserved Characters as per
@@ -79,6 +82,9 @@ const
 
   Unreserved3986Characters = AlphaNumericCharacters + ['-','_','.','~'];  //RFC 3986 list of "Unreserved Characters"
 
+{$IFNDEF DX_Supports_SLineBreak}
+  sLineBreak = {$IFDEF POSIX}Char(#10);{$ELSE}Char(#13) + Char(#10);{$ENDIF}
+{$ENDIF}
 
 implementation
 uses
@@ -89,28 +95,30 @@ uses
   {$ENDIF}
 
 
-
-//1 for Legacy Delphi compilers
-//0 for Zero Based Strings / NextGen Compilers
-function LowString():Integer;
+function ByteLength(const aChar:Char):Integer;
 begin
-  //todo: ZBS
-  Result := 1;
+  Result := SizeOf(Char);
 end;
 
-
-function HighString(const pValue:String):Integer;
+function ByteLength(const aString:String):Integer;
 begin
-  //todo: ZBS
-  Result := Length(pValue);
+  Result := Length(aString) * SizeOf(Char);
 end;
-
 
 {$IFDEF DX_String_Is_UTF16}
-function HighString(const pValue:AnsiString):Integer;
+function ByteLength(const aChar:AnsiChar):Integer;
 begin
-  //todo: ZBS
-  Result := Length(pValue);
+  Result := SizeOf(AnsiChar);
+end;
+
+function ByteLength(const aString:AnsiString):Integer;
+begin
+  Result := Length(aString) * SizeOf(AnsiChar);
+end;
+
+function CharInSet(C:AnsiChar; const CharSet:TSysAnsiCharSet):Boolean;
+begin
+  Result := C in CharSet;
 end;
 {$ENDIF}
 
@@ -128,11 +136,6 @@ begin
 end;
 {$ENDIF}
 
-
-function CharInSet(C:AnsiChar; const CharSet:TSysAnsiCharSet):Boolean;
-begin
-  Result := C in CharSet;
-end;
 
 
 function URIEncodeElement(const pText:AnsiString):AnsiString;
