@@ -19,7 +19,7 @@ dealings in this Software without prior written authorization of the copyright h
 As of January 2016, latest version available online at:
   https://github.com/darianmiller/dxLib
 
-D5X Win32/Win64 Ready
+D5-XE+ Win32/Win64 Ready
 *)
 
 {$I dxLib.inc}
@@ -37,12 +37,12 @@ uses
 
 type
 
-  T5xThread = class;
-  T5xNotifyThreadEvent = procedure(const pThread:T5xThread) of object;
-  T5xExceptionEvent = procedure(const pSender:TObject; const pException:Exception) of object;
+  TdxThread = class;
+  TdxNotifyThreadEvent = procedure(const pThread:TdxThread) of object;
+  TdxExceptionEvent = procedure(const pSender:TObject; const pException:Exception) of object;
 
 
-  T5xThreadState = (tsActive,
+  TdxThreadState = (tsActive,
                     tsSuspended_NotYetStarted,
                     tsSuspended_ManuallyStopped,
                     tsSuspended_RunOnceCompleted,
@@ -50,7 +50,7 @@ type
                     tsSuspendPending_RunOnceComplete,
                     tsTerminated);
 
-  T5xThreadExecOption = (teRepeatRun,
+  TdxThreadExecOption = (teRepeatRun,
                          teRunThenSuspend,
                          teRunThenFree);
 
@@ -66,18 +66,18 @@ type
   ///   2):Replace checking for Terminated in descendant Run loop with ThreadIsActive()
   ///</remarks>
   {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-  T5xThread = class(TThread)
+  TdxThread = class(TThread)
   private
-    fThreadState:T5xThreadState;
-    fStateChangeLock:T5xProcessResourceLock;
+    fThreadState:TdxThreadState;
+    fStateChangeLock:TdxProcessResourceLock;
 
     fExecOptionInt:Integer;
     fRequireCoinitialize:Boolean;
 
     fProgressTextToReport:String;
     fTrappedException:Exception;
-    fOnException:T5xExceptionEvent;
-    fOnRunCompletion:T5xNotifyThreadEvent;
+    fOnException:TdxExceptionEvent;
+    fOnRunCompletion:TdxNotifyThreadEvent;
     fOnReportProgress:TGetStrProc;
 
     fAbortableSleepEvent:TEvent;
@@ -95,7 +95,7 @@ type
     /// This is executed by outside threads OR by Self within its own context
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    function GetThreadState():T5xThreadState;
+    function GetThreadState():TdxThreadState;
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private getter method, GetExecOption, is used to read the current
@@ -106,7 +106,7 @@ type
     /// This is executed by outside threads OR by Self within its own context
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    function GetExecOption():T5xThreadExecOption;
+    function GetExecOption():TdxThreadExecOption;
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private setter method, SetExecOption, is used to write the current
@@ -117,7 +117,7 @@ type
     /// This is executed by outside threads OR by Self within its own context
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    procedure SetExecOption(const pVal:T5xThreadExecOption);
+    procedure SetExecOption(const pVal:TdxThreadExecOption);
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private method, SuspendThread, is use to deactivate an active
@@ -128,7 +128,7 @@ type
     /// This is executed by outside threads OR by Self within its own context
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    procedure SuspendThread(const pReason:T5xThreadState);
+    procedure SuspendThread(const pReason:TdxThreadState);
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The private method, Sync_CallOnReportProgress, is meant to be protected
@@ -209,7 +209,7 @@ type
     /// This is referenced by outside threads OR by Self within its own context
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    property ThreadState:T5xThreadState read GetThreadState;
+    property ThreadState:TdxThreadState read GetThreadState;
   protected
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
@@ -241,7 +241,7 @@ type
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The virtual Abstract protected method, Run, should be overriden by descendant
-    /// classes to perform work. The option (T5xThreadExecOption) passed to
+    /// classes to perform work. The option (TdxThreadExecOption) passed to
     /// Start controls how Run is executed.
     ///</summary>
     ///<remarks>
@@ -337,7 +337,7 @@ type
     /// context - which is the reason for InterlockedExchange in SetExecOption
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    property ExecOption:T5xThreadExecOption read GetExecOption write SetExecOption;
+    property ExecOption:TdxThreadExecOption read GetExecOption write SetExecOption;
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The protected property, RequireCoinitialize, is available for
@@ -355,7 +355,7 @@ type
   public
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
-    /// Public constructor for T5xThread, a descendant of TThread.
+    /// Public constructor for TdxThread, a descendant of TThread.
     /// Note: This constructor differs from TThread as all of these threads are
     /// started suspended by default.
     ///</summary>
@@ -367,7 +367,7 @@ type
     constructor Create();
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
-    /// Public destructor for T5xThread, a descendant of TThread.
+    /// Public destructor for TdxThread, a descendant of TThread.
     /// Note: This will automatically terminate/waitfor thread as needed
     ///</summary>
     ///<remarks>
@@ -381,7 +381,7 @@ type
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The public method, Start, is used to activate the thread to begin work.
-    /// All T5xThreads are created in suspended mode and must be activated to do
+    /// All TdxThreads are created in suspended mode and must be activated to do
     /// any work.
     ///
     /// Note: By default, the descendant's 'Run' method is continuously executed
@@ -395,7 +395,7 @@ type
     /// temporarily starts the thread in order to properly shut it down.)
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    function Start(const pExecOption:T5xThreadExecOption=teRepeatRun):Boolean;
+    function Start(const pExecOption:TdxThreadExecOption=teRepeatRun):Boolean;
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The public method, Stop, is a thread-safe way to deactivate a running
@@ -462,7 +462,7 @@ type
     /// referenced by Self within its own context in a non-threadsafe manner.
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    property OnException:T5xExceptionEvent read fOnException write fOnException;
+    property OnException:TdxExceptionEvent read fOnException write fOnException;
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The public event property, OnRunCompletion, is executed as soon as the
@@ -475,7 +475,7 @@ type
     /// referenced by Self within its own context in a non-threadsafe manner.
     ///</remarks>
     {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    property OnRunCompletion:T5xNotifyThreadEvent read fOnRunCompletion write fOnRunCompletion;
+    property OnRunCompletion:TdxNotifyThreadEvent read fOnRunCompletion write fOnRunCompletion;
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
     /// The public event property, OnReportProgress, is executed by descendant
@@ -499,18 +499,18 @@ uses
   dxLib_WinApi;
 
 
-constructor T5xThread.Create();
+constructor TdxThread.Create();
 begin
   inherited Create(True); //We always create suspended, user must always call Start()
 
   fThreadState := tsSuspended_NotYetStarted;
-  fStateChangeLock := T5xProcessResourceLock.Create();
+  fStateChangeLock := TdxProcessResourceLock.Create();
   fAbortableSleepEvent := TEvent.Create(nil, True, False, '');
   fResumeSignal := TEvent.Create(nil, True, False, '');
 end;
 
 
-destructor T5xThread.Destroy();
+destructor TdxThread.Destroy();
 begin
   if fThreadState = tsSuspended_NotYetStarted then
   begin
@@ -542,7 +542,7 @@ begin
 end;
 
 
-procedure T5xThread.Execute();
+procedure TdxThread.Execute();
 begin
   try //except
   
@@ -615,7 +615,7 @@ begin
 end;
 
 
-procedure T5xThread.WaitForResume();
+procedure TdxThread.WaitForResume();
 begin
   fStateChangeLock.Lock();
   try
@@ -638,33 +638,33 @@ begin
 end;
 
 
-procedure T5xThread.ThreadHasResumed();
+procedure TdxThread.ThreadHasResumed();
 begin
   fAbortableSleepEvent.ResetEvent();
   fResumeSignal.ResetEvent();
 end;
 
 
-function T5xThread.ExternalRequestToStop:Boolean;
+function TdxThread.ExternalRequestToStop:Boolean;
 begin
   //Intended to be overriden - for descendant's use as needed
   Result := False;
 end;
 
 
-procedure T5xThread.BeforeRun();
+procedure TdxThread.BeforeRun();
 begin
   //Intended to be overriden - for descendant's use as needed
 end;
 
 
-procedure T5xThread.AfterRun();
+procedure TdxThread.AfterRun();
 begin
   //Intended to be overriden - for descendant's use as needed
 end;
 
 
-function T5xThread.Start(const pExecOption:T5xThreadExecOption=teRepeatRun):Boolean;
+function TdxThread.Start(const pExecOption:TdxThreadExecOption=teRepeatRun):Boolean;
 begin
   if fStateChangeLock.TryLock() then
   begin
@@ -679,7 +679,7 @@ begin
           fThreadState := tsActive;
           //We haven't started Exec loop at all yet
           //Since we start all threads in suspended state, we need one initial Resume()
-         {$IFDEF RESUME_DEPRECATED}
+         {$IFDEF DX_TThread_Deprecated_Resume}
            inherited Start();
          {$ELSE}
            Resume();
@@ -703,7 +703,7 @@ begin
 end;
 
 
-function T5xThread.Stop():Boolean;
+function TdxThread.Stop():Boolean;
 begin
   if ExecOption <> teRunThenFree then
   begin
@@ -731,7 +731,7 @@ begin
 end;
 
 
-procedure T5xThread.SuspendThread(const pReason:T5xThreadState);
+procedure TdxThread.SuspendThread(const pReason:TdxThreadState);
 begin
   fStateChangeLock.Lock();
   try
@@ -743,7 +743,7 @@ begin
 end;
 
 
-procedure T5xThread.Sync_CallOnRunCompletion();
+procedure TdxThread.Sync_CallOnRunCompletion();
 begin
   if not Terminated then
   begin
@@ -752,7 +752,7 @@ begin
 end;
 
 
-procedure T5xThread.DoOnRunCompletion();
+procedure TdxThread.DoOnRunCompletion();
 begin
   if Assigned(fOnRunCompletion) then
   begin
@@ -761,7 +761,7 @@ begin
 end;
 
 
-procedure T5xThread.Sync_CallOnException();
+procedure TdxThread.Sync_CallOnException();
 begin
   if not Terminated then
   begin
@@ -770,7 +770,7 @@ begin
 end;
 
 
-procedure T5xThread.DoOnException();
+procedure TdxThread.DoOnException();
 begin
   if Assigned(fOnException) then
   begin
@@ -780,7 +780,7 @@ begin
 end;
 
 
-function T5xThread.GetThreadState():T5xThreadState;
+function TdxThread.GetThreadState():TdxThreadState;
 begin
   fStateChangeLock.Lock();
   try
@@ -799,19 +799,19 @@ begin
 end;
 
 
-function T5xThread.GetExecOption():T5xThreadExecOption;
+function TdxThread.GetExecOption():TdxThreadExecOption;
 begin
-  Result := T5xThreadExecOption(fExecOptionInt);
+  Result := TdxThreadExecOption(fExecOptionInt);
 end;
 
 
-procedure T5xThread.SetExecOption(const pVal:T5xThreadExecOption);
+procedure TdxThread.SetExecOption(const pVal:TdxThreadExecOption);
 begin
   InterlockedExchange(fExecOptionInt, Ord(pVal));
 end;
 
 
-function T5xThread.CanBeStarted():Boolean;
+function TdxThread.CanBeStarted():Boolean;
 begin
   if Assigned(fAwakeToFreeEvent) then
   begin
@@ -840,13 +840,13 @@ begin
 end;
 
 
-function T5xThread.ThreadIsActive():Boolean;
+function TdxThread.ThreadIsActive():Boolean;
 begin
   Result := (not Terminated) and (ThreadState = tsActive);
 end;
 
 
-procedure T5xThread.Sleep(const pSleepTimeMS:Integer);
+procedure TdxThread.Sleep(const pSleepTimeMS:Integer);
 begin
   if not Terminated then
   begin
@@ -855,13 +855,13 @@ begin
 end;
 
 
-procedure T5xThread.CallSynchronize(const pMethod:TThreadMethod);
+procedure TdxThread.CallSynchronize(const pMethod:TThreadMethod);
 begin
   Synchronize(pMethod);
 end;
 
 
-procedure T5xThread.Sync_CallOnReportProgress();
+procedure TdxThread.Sync_CallOnReportProgress();
 begin
   if not Terminated then
   begin
@@ -870,7 +870,7 @@ begin
 end;
 
 
-procedure T5xThread.ReportProgress(const pAnyProgressText:String);
+procedure TdxThread.ReportProgress(const pAnyProgressText:String);
 begin
   if Assigned(fOnReportProgress) then
   begin
@@ -880,7 +880,7 @@ begin
 end;
 
 
-function T5xThread.WaitForHandle(const pHandle:THandle):Boolean;
+function TdxThread.WaitForHandle(const pHandle:THandle):Boolean;
 const
   WaitAllOption = False;
   IterateTimeOutMilliseconds = 200;

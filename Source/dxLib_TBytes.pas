@@ -30,7 +30,7 @@ uses
   SysUtils,
   Classes;
 
-  {$IFNDEF TBYTES_DEFINED} //TBytes built-in D2007+
+  {$IFNDEF DX_Supports_TBytes} //TBytes built-in D2006+
   type
     TBytes = Array of Byte;
   {$ENDIF}
@@ -38,17 +38,17 @@ uses
   function Bytes(const A:Array of Byte):TBytes;
 
   procedure StringToBytes(const pSource:String; var pDestination:TBytes); overload;
-  {$IFDEF STRING_IS_UNICODE}
+  {$IFDEF DX_String_Is_UTF16}
   procedure StringToBytes(const pSource:AnsiString; var pDestination:TBytes); overload;
   {$ENDIF}
 
   procedure BytesToString(const pSource:TBytes; var pDestination:String); overload;
-  {$IFDEF STRING_IS_UNICODE}
+  {$IFDEF DX_String_Is_UTF16}
   procedure BytesToString(const pSource:TBytes; var pDestination:AnsiString); overload;
   {$ENDIF}
 
   procedure AppendBytes(const pSource:String; var pDestination:TBytes); overload;
-  {$IFDEF STRING_IS_UNICODE}
+  {$IFDEF DX_String_Is_UTF16}
   procedure AppendBytes(const pSource:AnsiString; var pDestination:TBytes); overload;
   {$ENDIF}
   procedure AppendBytes(const pSource:Array of Byte; var pDestination:TBytes; const pByteCount:Integer=0); overload;
@@ -89,7 +89,7 @@ begin
 end;
 
 
-{$IFDEF STRING_IS_UNICODE}
+{$IFDEF DX_String_Is_UTF16}
 procedure StringToBytes(const pSource:AnsiString; var pDestination:TBytes);
 begin
   SetLength(pDestination, Length(pSource) * SizeOf(AnsiChar));
@@ -112,7 +112,7 @@ begin
 end;
 
 
-{$IFDEF STRING_IS_UNICODE}
+{$IFDEF DX_String_Is_UTF16}
 procedure BytesToString(const pSource:TBytes; var pDestination:AnsiString);
 begin
   SetString(pDestination, PAnsiChar(@pSource[0]), Length(pSource));
@@ -139,7 +139,7 @@ begin
 end;
 
 
-{$IFDEF STRING_IS_UNICODE}
+{$IFDEF DX_String_Is_UTF16}
 procedure AppendBytes(const pSource:AnsiString; var pDestination:TBytes); overload;
 var
   vDestLen:Integer;

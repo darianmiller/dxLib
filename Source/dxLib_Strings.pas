@@ -32,12 +32,12 @@ type
 
   function LowString():Integer;
   function HighString(const pValue:String):Integer; overload;
-  {$IFDEF STRING_IS_UNICODE}
+  {$IFDEF DX_String_Is_UTF16}
   function HighString(const pValue:AnsiString):Integer; overload;
   {$ENDIF}
 
   function IsPrintableCharacter(const pChar:Char):Boolean; overload;
-  {$IFDEF STRING_IS_UNICODE}
+  {$IFDEF DX_String_Is_UTF16}
   function IsPrintableCharacter(const pChar:AnsiChar):Boolean; overload;
   {$ENDIF}
 
@@ -101,7 +101,7 @@ begin
 end;
 
 
-{$IFDEF STRING_IS_UNICODE}
+{$IFDEF DX_String_Is_UTF16}
 function HighString(const pValue:AnsiString):Integer;
 begin
   //todo: ZBS
@@ -116,7 +116,7 @@ begin
 end;
 
 
-{$IFDEF STRING_IS_UNICODE}
+{$IFDEF DX_String_Is_UTF16}
 function IsPrintableCharacter(const pChar:AnsiChar):Boolean;
 begin
   Result := (Ord(pChar) >= 32) and (Ord(pChar) <= 126);

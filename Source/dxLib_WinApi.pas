@@ -19,7 +19,7 @@ dealings in this Software without prior written authorization of the copyright h
 As of January 2016, latest version available online at:
   https://github.com/darianmiller/dxLib
 
-D5X Win32/Win64 Ready
+D5-XE+ Win32/Win64 Ready
 *)
 
 unit dxLib_WinApi;
@@ -140,7 +140,7 @@ end;
   MyCustomMessageTYpe:DWord = 0;
 
   initialization  //or on main form creation, etc.
-    MyCustomMessageType := RegisterWindowMessage('D5X_CustomMessage');
+    MyCustomMessageType := RegisterWindowMessage('dxLib_CustomMessage');
 
 2) Register to receive WM_COPYDATA messages on a form
   procedure WMCopyData(var Msg:TWMCopyData); message WM_COPYDATA;
