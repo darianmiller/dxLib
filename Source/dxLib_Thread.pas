@@ -22,16 +22,23 @@ As of January 2016, latest version available online at:
 D5-XE+ Win32/Win64 Ready
 *)
 
-{$I dxLib.inc}
 unit dxLib_Thread;
 
 interface
+{$I dxLib.inc}
 
 uses
-  Classes,
-  Windows,
+  {$IFDEF DX_UnitScopeNames}
+  System.SysUtils,
+  System.Classes,
+  System.SyncObjs,
+  Winapi.Windows,
+  {$ELSE}
   SysUtils,
+  Classes,
   SyncObjs,
+  Windows,
+  {$ENDIF}
   dxLib_ProcessLock;
 
 
@@ -495,7 +502,11 @@ type
 implementation
 
 uses
+  {$IFDEF DX_UnitScopeNames}
+  WinApi.ActiveX
+  {$ELSE}
   ActiveX,
+  {$ENDIF}
   dxLib_WinApi;
 
 

@@ -19,13 +19,13 @@ dealings in this Software without prior written authorization of the copyright h
 As of January 2016, latest version available online at:
   https://github.com/darianmiller/dxLib
 
-D5X Win32/Win64 Ready
+D5-XE+ Win32/Win64 Ready
 *)
 
-{$I dxLib.inc}
 unit dxLib_Strings;
 
 interface
+{$I dxLib.inc}
 
 type
   TSysAnsiCharSet = set of AnsiChar;
@@ -82,7 +82,12 @@ const
 
 implementation
 uses
+  {$IFDEF DX_UnitScopeNames}
+  System.SysUtils;
+  {$ELSE}
   SysUtils;
+  {$ENDIF}
+
 
 
 //1 for Legacy Delphi compilers

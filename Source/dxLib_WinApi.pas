@@ -25,9 +25,16 @@ D5-XE+ Win32/Win64 Ready
 unit dxLib_WinApi;
 
 interface
+{$I dxLib.inc}
+
 uses
+  {$IFDEF DX_UnitScopeNames}
+  Winapi.Windows,
+  Winapi.Messages;
+  {$ELSE}
   Windows,
   Messages;
+  {$ENDIF}
 
   //Waits for signals to fire while processing pending message queue
   function WaitWithMessageLoop(const pHandleToWaitOn:THandle; const pMaxTimeToWaitMS:DWord=INFINITE):Boolean;

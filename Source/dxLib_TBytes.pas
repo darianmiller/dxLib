@@ -19,16 +19,23 @@ dealings in this Software without prior written authorization of the copyright h
 As of January 2016, latest version available online at:
   https://github.com/darianmiller/dxLib
 
-D5X Win32/Win64 Ready
+D5-XE+ Win32/Win64 Ready
 *)
 
-{$I dxLib.inc}
 unit dxLib_TBytes;
 
 interface
+{$I dxLib.inc}
+
 uses
+  {$IFDEF DX_UnitScopeNames}
+  System.SysUtils,
+  System.Classes;
+  {$ELSE}
   SysUtils,
   Classes;
+  {$ENDIF}
+
 
   {$IFNDEF DX_Supports_TBytes} //TBytes built-in D2006+
   type
@@ -63,7 +70,11 @@ uses
 
 implementation
 uses
+  {$IFDEF DX_UnitScopeNames}
+  System.Math,
+  {$ELSE}
   Math,
+  {$ENDIF}
   dxLib_Strings;
 
 

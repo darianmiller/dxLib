@@ -19,15 +19,20 @@ dealings in this Software without prior written authorization of the copyright h
 As of January 2016, latest version available online at:
   https://github.com/darianmiller/dxLib
 
-D5X Win32/Win64 Ready.
+D5-XE+ Win32/Win64 Ready.
 *)
 
-{$I dxLib.inc}
 unit dxLib_ProcessLock;
 
 interface
+{$I dxLib.inc}
+
 uses
+  {$IFDEF DX_UnitScopeNames}
+  Winapi.Windows;
+  {$ELSE}
   Windows;
+  {$ENDIF}
 
 const
   DefSpinCount = 3800;

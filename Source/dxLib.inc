@@ -19,7 +19,7 @@ dealings in this Software without prior written authorization of the copyright h
 As of January 2016, latest version available online at:
   https://github.com/darianmiller/dxLib
 
-D5X Win32/Win64 Ready
+D5-XE+ Win32/Win64 Ready
 *)
 
 {$IFDEF VER80}    //Delphi 1, Borland: Released 14th February 1995, Codename Delphi/Wasabi/Mango
@@ -372,7 +372,7 @@ D5X Win32/Win64 Ready
   {$DEFINE DX_String_Is_UTF16}
   {$DEFINE DX_Supports_SLineBreak}  //todo: validate when this was introduced
   {$DEFINE DX_Supports_CharInSet}   //todo: validate when this was introduced
-{$ENDIF}
+{$ENDIF}                          
 
 {$IFDEF DX_DELPHI2010_UP}
   {$DEFINE DX_Supports_NameThreadForDebugging}
