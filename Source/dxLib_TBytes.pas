@@ -1,6 +1,5 @@
 (*
-Copyright (c) 2013 Darian Miller
-
+Copyright (c) 2016 Darian Miller
 All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal
@@ -18,8 +17,6 @@ dealings in this Software without prior written authorization of the copyright h
 
 As of January 2016, latest version available online at:
   https://github.com/darianmiller/dxLib
-
-D5-XE+ Win32/Win64 Ready
 *)
 
 unit dxLib_TBytes;
