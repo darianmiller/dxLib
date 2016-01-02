@@ -1,4 +1,4 @@
-d5xlib
+dxLib
 ======
 
 Delphi 5 - Delphi XE+ general purpose library of routines.
