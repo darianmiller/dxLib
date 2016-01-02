@@ -115,13 +115,15 @@ function ByteLength(const aString:AnsiString):Integer;
 begin
   Result := Length(aString) * SizeOf(AnsiChar);
 end;
+{$ENDIF}
 
+
+{$IFNDEF DX_Supports_CharInSet}
 function CharInSet(C:AnsiChar; const CharSet:TSysAnsiCharSet):Boolean;
 begin
   Result := C in CharSet;
 end;
 {$ENDIF}
-
 
 function IsPrintableCharacter(const pChar:Char):Boolean;
 begin
@@ -144,7 +146,7 @@ var
 begin
   Result := '';
 
-  for i := LowString to HighString(pText) do
+  for i := 1 to Length(pText) do
   begin
     if not CharInSet(pText[i], Unreserved3986Characters) then
     begin
@@ -168,7 +170,7 @@ begin
   vHexCode := '';
   vEncodePosition := 0;
 
-  for i := LowString to HighString(pText) do
+  for i := 1 to Length(pText) do
   begin
     Case vEncodePosition of
     0:
