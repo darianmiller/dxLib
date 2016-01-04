@@ -23,6 +23,24 @@ unit dxLib_JSONUtils;
 interface
 {$I dxLib.inc}
 
+  function JSON_NameValue(const aName:String; const aValue:String):String; overload;
+  function JSON_NameValue(const aName:String; const aValue:Boolean):String; overload;
+  function JSON_NameValue(const aName:String; const aValue:Currency):String; overload;
+  function JSON_NameValue(const aName:String; const aValue:Extended):String; overload;
+  function JSON_NameValue(const aName:String; const aValue:Integer):String; overload;
+  function JSON_NameValue(const aName:String; const aValue:Int64):String; overload;
+
+
+  function JSON_Boolean(const aValue:Boolean):String;
+  function JSON_Currency(const aValue:Currency):String;
+  function JSON_Float(const aValue:Extended):String;
+  function JSON_Integer(const aValue:Integer):String;
+  function JSON_Int64(const aValue:Int64):String;
+  function JSON_Null():String;
+  function JSON_String(const aValue:String):String;
+  function JSON_SubObject(const aName:String; const aJSONObject:String):String;
+
+
 const
   //RFC4627: Insignificant whitespace is allowed before or after any of the six structural characters.
   JSON_WHITESPACE_CHARACTERS = [#9,#10,#13,#32];
@@ -31,6 +49,139 @@ const
 
 
 implementation
+uses
+  {$IFDEF DX_UnitScopeNames}
+  System.SysUtils;
+  {$ELSE}
+  SysUtils;
+  {$ENDIF}
+
+
+function JSON_NameValue(const aName:String; const aValue:String):String;
+begin
+  Result := JSON_String(aName) + ':' + JSON_String(aValue);
+end;
+
+function JSON_NameValue(const aName:String; const aValue:Boolean):String;
+begin
+  Result := JSON_String(aName) + ':' + JSON_Boolean(aValue);
+end;
+
+function JSON_NameValue(const aName:String; const aValue:Currency):String;
+begin
+  Result := JSON_String(aName) + ':' + JSON_Currency(aValue);
+end;
+
+function JSON_NameValue(const aName:String; const aValue:Extended):String;
+begin
+  Result := JSON_String(aName) + ':' + JSON_Float(aValue);
+end;
+
+function JSON_NameValue(const aName:String; const aValue:Integer):String;
+begin
+  Result := JSON_String(aName) + ':' + JSON_Integer(aValue);
+end;
+
+function JSON_NameValue(const aName:String; const aValue:Int64):String;
+begin
+  Result := JSON_String(aName) + ':' + JSON_Int64(aValue);
+end;
+
+
+function JSON_Boolean(const aValue:Boolean):String;
+begin
+  if aValue then
+  begin
+    Result := 'true';
+  end
+  else
+  begin
+    Result := 'false';
+  end;
+end;
+
+function JSON_Currency(const aValue:Currency):String;
+begin
+  Result := FormatFloat('#0.00##', aValue);
+end;
+
+function JSON_Float(const aValue:Extended):String;
+begin
+  Result := FloatToStrF(aValue, ffGeneral, 18, 0);
+end;
+
+function JSON_Integer(const aValue:Integer):String;
+begin
+  Result := IntToStr(aValue);
+end;
+
+function JSON_Int64(const aValue:Int64):String;
+begin
+  Result := IntToStr(aValue);
+end;
+
+function JSON_Null():String;
+begin
+  Result := 'null';
+end;
+
+function JSON_String(const aValue:String):String;
+var
+  i:Integer;
+  vChar:Char;
+begin
+  Result := '"';
+  for i := 1 to Length(aValue) do
+  begin
+    vChar := aValue[i];
+    if vChar = '/' then
+    begin
+      Result := Result + '\/';
+    end
+    else if vChar = '\' then
+    begin
+      Result := Result + '\\';
+    end
+    else if vChar = '"' then
+    begin
+      Result := Result + '\"';
+    end
+    else if vChar = #8 then
+    begin
+      Result := Result + '\b';
+    end
+    else if vChar = #9 then
+    begin
+      Result := Result + '\t';
+    end
+    else if vChar = #10 then
+    begin
+      Result := Result + '\n';
+    end
+    else if vChar = #12 then
+    begin
+      Result := Result + '\f';
+    end
+    else if vChar = #13 then
+    begin
+      Result := Result + '\r';
+    end
+    else if (Ord(vChar) < 32) or (Ord(vChar) > 127) then
+    begin
+      Result := Result + '\u' + IntToHex(Ord(vChar), 4);
+    end
+    else
+    begin
+      Result := Result + vChar;
+    end;
+  end;
+  Result := Result + '"';
+end;
+
+function JSON_SubObject(const aName:String; const aJSONObject:String):String;
+begin
+  Result := JSON_String(aName) + ':' + aJSONObject;
+end;
 
 
 end.
