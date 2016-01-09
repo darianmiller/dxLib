@@ -39,7 +39,6 @@ const
   //D10 Seattle DOC: The default/nodefault directives are supported only for ordinal types and for set types (provided the upper/lower bounds of the set's base type have ordinal values between 0 and 31)
   //[dcc32 Error] E2146 Default values must be of ordinal, pointer or small set type
   PROPERTIES_WITH_DEFAULT_VALUES = [tkInteger, tkInt64, tkChar, tkWChar, tkEnumeration, tkSet];
-  //todo: NEXTGEN
 
   //D10 Seattle DOC: Note: You can't use the ordinal value 2147483648 as a default value. This value is used internally to represent nodefault.
   NO_DEFAULT_VALUE_PROPERTY_FLAG = Low(LongInt);  //D5 Use Low(LongInt) instead of -2147483648 or $80000000
