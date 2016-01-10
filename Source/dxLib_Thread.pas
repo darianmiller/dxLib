@@ -52,7 +52,8 @@ type
                     tsSuspended_RunOnceCompleted,
                     tsSuspendPending_StopRequestReceived,
                     tsSuspendPending_RunOnceComplete,
-                    tsTerminated);
+                    tsTerminated,
+                    tsAbortedDueToException);
 
   TdxThreadExecOption = (teRepeatRun,
                          teRunThenSuspend,
@@ -239,8 +240,19 @@ type
     /// Context Note:
     /// This is called internally by Self within its own context.
     ///</remarks>
-    {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
-    procedure BeforeRun(); virtual;
+    {$ENDREGION}
+    procedure BeforeRun(); virtual;      // Override as needed
+    ///<summary>
+    /// The Virtual protected method, BetweenRuns, is an empty stub versus an
+    /// abstract method to allow for optional use by descendants.
+    /// Typically, pause between executions occurs during this routine
+    ///</summary>
+    ///<remarks>
+    /// Context Note:
+    /// This is called internally by Self within its own context.
+    ///</remarks>
+    {$ENDREGION}
+    procedure BetweenRuns(); virtual;      // Override as needed
 
     {$IFDEF NODEF}{$REGION 'Documentation'}{$ENDIF}
     ///<summary>
@@ -580,7 +592,8 @@ begin
             case ExecOption of
             teRepeatRun:
               begin
-                //loop
+                BetweenRuns();
+                //then loop
               end;
             teRunThenSuspend:
               begin
@@ -648,6 +661,8 @@ end;
 
 procedure TdxThread.ThreadHasResumed();
 begin
+  //If we resumed a stopped thread, then a reset event is needed as it
+  //was set to trigger out of any pending sleeps to pause the thread
   fAbortableSleepEvent.ResetEvent();
   fResumeSignal.ResetEvent();
 end;
@@ -661,6 +676,12 @@ end;
 
 
 procedure TdxThread.BeforeRun();
+begin
+  //Intended to be overriden - for descendant's use as needed
+end;
+
+
+procedure TdmsThread.BetweenRuns();
 begin
   //Intended to be overriden - for descendant's use as needed
 end;
@@ -744,6 +765,11 @@ begin
   fStateChangeLock.Lock();
   try
     fThreadState := pReason; //will auto-suspend thread in Exec
+
+    //If we are sleeping in the RUN loop, wake up and check stopped
+    //which is why you should use self.Sleep(x) instead of windows.sleep(x)
+    //AND why the sleep between iterations (if any) in the RUN should be the
+    //last line, and not the first line.
     fAbortableSleepEvent.SetEvent();
   finally
     fStateChangeLock.Unlock();
@@ -783,6 +809,12 @@ begin
   if Assigned(fOnException) then
   begin
     CallSynchronize(Sync_CallOnException);
+  end;
+  fStateChangeLock.Lock();
+  try
+    fThreadState := tsAbortedDueToException;
+  finally
+    fStateChangeLock.Unlock();
   end;
   fTrappedException := nil;
 end;
