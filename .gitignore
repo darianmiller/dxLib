@@ -71,4 +71,5 @@ $RECYCLE.BIN/
 *.log
 *.sil
 
-
+#SonarQube working folder
+.sonar/

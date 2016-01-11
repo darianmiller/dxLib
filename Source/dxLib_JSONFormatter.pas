@@ -133,6 +133,7 @@ end;
 
 constructor TdxJSONFormatter.Create();
 begin
+  inherited;
   SetDefaultStyle();
 end;
 

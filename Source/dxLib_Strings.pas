@@ -97,7 +97,7 @@ uses
 
 function ByteLength(const aChar:Char):Integer;
 begin
-  Result := SizeOf(Char);
+  Result := SizeOf(aChar);
 end;
 
 function ByteLength(const aString:String):Integer;
@@ -108,7 +108,7 @@ end;
 {$IFDEF DX_String_Is_UTF16}
 function ByteLength(const aChar:AnsiChar):Integer;
 begin
-  Result := SizeOf(AnsiChar);
+  Result := SizeOf(aChar);
 end;
 
 function ByteLength(const aString:AnsiString):Integer;

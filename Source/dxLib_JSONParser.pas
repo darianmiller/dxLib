@@ -170,7 +170,7 @@ begin
       end
       else if vCurrentChar = '{' then     //embedded object within a child object
       begin
-        Inc(vEndsToFind)
+        Inc(vEndsToFind);
       end;
       inc(fCurrentPosition);
     end;
@@ -285,7 +285,7 @@ begin
       end
       else if vCurrentChar = '[' then //embedded array within a child object
       begin
-        Inc(vEndsToFind)
+        Inc(vEndsToFind);
       end;
       inc(fCurrentPosition);
     end;
@@ -788,16 +788,16 @@ begin
     begin
       SetVariantProp(aInstance, aProperty, Null);
     end
-    else if aProperty.PropType^.Kind in [tkString, tkLString] then
-    begin
-      SetStrProp(aInstance, aProperty, 'null');
-    end
     {$IFDEF DX_String_Is_UTF16}
     else if aProperty.PropType^.Kind in [tkUString,tkWString] then
     begin
       SetStrProp(aInstance, aProperty, 'null');
     end
     {$ENDIF}
+    else if aProperty.PropType^.Kind in [tkString, tkLString] then
+    begin
+      SetStrProp(aInstance, aProperty, 'null');
+    end;
   end;
 end;
 
