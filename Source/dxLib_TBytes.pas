@@ -92,7 +92,7 @@ begin
   SetLength(pDestination, Length(pSource) * SizeOf(Char));
   if Length(pSource) > 0 then
   begin
-    Move(pSource[LowString], pDestination[0], Length(pDestination));
+    Move(pSource[1], pDestination[0], Length(pDestination));
   end;
 end;
 
@@ -103,7 +103,7 @@ begin
   SetLength(pDestination, Length(pSource) * SizeOf(AnsiChar));
   if Length(pSource) > 0 then
   begin
-    Move(pSource[LowString], pDestination[0], Length(pDestination));
+    Move(pSource[1], pDestination[0], Length(pDestination));
   end;
 end;
 {$ENDIF}
@@ -142,7 +142,7 @@ begin
   begin
     vDestLen := Length(pDestination);
     SetLength(pDestination, vDestLen + vAppendLen);
-    Move(pSource[LowString], pDestination[vDestLen], vAppendLen);
+    Move(pSource[1], pDestination[vDestLen], vAppendLen);
   end;
 end;
 
@@ -158,7 +158,7 @@ begin
   begin
     vDestLen := Length(pDestination);
     SetLength(pDestination, vDestLen + vAppendLen);
-    Move(pSource[LowString], pDestination[vDestLen], vAppendLen);
+    Move(pSource[1], pDestination[vDestLen], vAppendLen);
   end;
 end;
 {$ENDIF}

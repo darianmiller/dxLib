@@ -512,7 +512,7 @@ implementation
 
 uses
   {$IFDEF DX_UnitScopeNames}
-  WinApi.ActiveX
+  WinApi.ActiveX,
   {$ELSE}
   ActiveX,
   {$ENDIF}
@@ -681,7 +681,7 @@ begin
 end;
 
 
-procedure TdmsThread.BetweenRuns();
+procedure TdxThread.BetweenRuns();
 begin
   //Intended to be overriden - for descendant's use as needed
 end;
@@ -952,7 +952,7 @@ begin
       end;
     WAIT_FAILED:
        begin
-         {$IFDEF DELPHI6_UP}
+         {$IFDEF DX_DELPHI6_UP}
          RaiseLastOSError;
          {$ELSE}
          RaiseLastWin32Error;
