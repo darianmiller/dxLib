@@ -1,0 +1,48 @@
+package dxLibD230;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$IMPLICITBUILD ON}
+
+requires
+  rtl;
+
+contains
+  dxLib_ClassPropertyArray in '..\..\Source\dxLib_ClassPropertyArray.pas',
+  dxLib_JSONFormatter in '..\..\Source\dxLib_JSONFormatter.pas',
+  dxLib_JSONObjects in '..\..\Source\dxLib_JSONObjects.pas',
+  dxLib_JSONParser in '..\..\Source\dxLib_JSONParser.pas',
+  dxLib_JSONUtils in '..\..\Source\dxLib_JSONUtils.pas',
+  dxLib_ProcessLock in '..\..\Source\dxLib_ProcessLock.pas',
+  dxLib_RTTI in '..\..\Source\dxLib_RTTI.pas',
+  dxLib_Streams in '..\..\Source\dxLib_Streams.pas',
+  dxLib_Strings in '..\..\Source\dxLib_Strings.pas',
+  dxLib_System in '..\..\Source\dxLib_System.pas',
+  dxLib_Thread in '..\..\Source\dxLib_Thread.pas',
+  dxLib_WinApi in '..\..\Source\dxLib_WinApi.pas',
+  dxLib_TBytes in '..\..\Source\dxLib_TBytes.pas';
+
+end.
