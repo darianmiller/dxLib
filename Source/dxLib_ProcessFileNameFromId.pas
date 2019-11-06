@@ -18,7 +18,7 @@ dealings in this Software without prior written authorization of the copyright h
 As of November 2019, latest version available online at:
   https://github.com/darianmiller/dxLib
 *)
-unit dxLib_ProcessNameToId;
+unit dxLib_ProcessFileNameFromId;
 
 interface
 {$I dxLib.inc}
