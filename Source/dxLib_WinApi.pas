@@ -47,43 +47,6 @@ uses
 
   procedure RaiseLastWindowsError();
 
-  {$IFDEF DX_DELPHI6_UP}
-    {$IFNDEF DX_DELPHI2009_UP}
-    Type
-      PByte = PAnsiChar;
-      //NativeInt didn't exist or was broken before Delphi 2009.
-      NativeInt = Integer;
-    {$ENDIF}
-
-    {$IFNDEF DX_DELPHI2010_UP}
-    Type
-      //NativeUInt didn't exist or was broken before Delphi 2010
-      NativeUInt = Cardinal;
-    {$ENDIF}
-
-    {$IFNDEF DX_DELPHIXE_UP}
-    Type
-      //PNativeUInt didn't exist before Delphi XE
-      PNativeUInt = ^Cardinal;
-    {$ENDIF}
-
-    {$IFNDEF DX_DELPHIXE2_UP}
-    Type
-      //IntPtr and UIntPtr didn't exist before Delphi XE2
-      IntPtr = Integer;
-      UIntPtr = Cardinal;
-    {$ENDIF}
-  {$ELSE} //prior to D6
-    Type
-      PByte = PAnsiChar;
-      NativeInt = Integer;
-      NativeUInt = Cardinal;
-      PNativeUInt = ^Cardinal;
-      IntPtr = Integer;
-      UIntPtr = Cardinal;
-  {$ENDIF}
-
-
 implementation
 uses
   {$IFDEF DX_UnitScopeNames}
