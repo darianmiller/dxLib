@@ -42,8 +42,55 @@ uses
   function GetWMCopyDataString(const pMsg:TWMCopyData):String;
   function ValidHandleValue(const pHandle:THandle):Boolean;
 
+  function GetWindowsFolder():string;
+  function GetWindowsSystemRoot():string;
+
+  procedure RaiseLastWindowsError();
+
+  {$IFDEF DX_DELPHI6_UP}
+    {$IFNDEF DX_DELPHI2009_UP}
+    Type
+      PByte = PAnsiChar;
+      //NativeInt didn't exist or was broken before Delphi 2009.
+      NativeInt = Integer;
+    {$ENDIF}
+
+    {$IFNDEF DX_DELPHI2010_UP}
+    Type
+      //NativeUInt didn't exist or was broken before Delphi 2010
+      NativeUInt = Cardinal;
+    {$ENDIF}
+
+    {$IFNDEF DX_DELPHIXE_UP}
+    Type
+      //PNativeUInt didn't exist before Delphi XE
+      PNativeUInt = ^Cardinal;
+    {$ENDIF}
+
+    {$IFNDEF DX_DELPHIXE2_UP}
+    Type
+      //IntPtr and UIntPtr didn't exist before Delphi XE2
+      IntPtr = Integer;
+      UIntPtr = Cardinal;
+    {$ENDIF}
+  {$ELSE} //prior to D6
+    Type
+      PByte = PAnsiChar;
+      NativeInt = Integer;
+      NativeUInt = Cardinal;
+      PNativeUInt = ^Cardinal;
+      IntPtr = Integer;
+      UIntPtr = Cardinal;
+  {$ENDIF}
+
 
 implementation
+uses
+  {$IFDEF DX_UnitScopeNames}
+  System.SysUtils;
+  {$ELSE}
+  SysUtils;
+  {$ENDIF}
 
 
 function WaitWithMessageLoop(const pHandleToWaitOn:THandle; const pMaxTimeToWaitMS:DWord=INFINITE):Boolean;
@@ -186,6 +233,54 @@ end;
 function GetWMCopyDataString(const pMsg:TWMCopyData):String;
 begin
   SetString(Result, PChar(pMsg.CopyDataStruct.lpData), pMsg.CopyDataStruct.cbData div SizeOf(Char));
+end;
+
+
+function GetWindowsFolder():string;
+var
+  vLen:Integer;
+begin
+  Result := '';
+  SetLength(Result, MAX_PATH);
+  //https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectoryw
+  vLen := GetWindowsDirectory(PChar(Result), MAX_PATH);
+  if vLen > 0 then
+  begin
+    SetLength(Result, vLen);
+  end
+  else
+  begin
+    RaiseLastWindowsError();
+  end;
+end;
+
+
+function GetWindowsSystemRoot():string;
+var
+  vLen:Integer;
+begin
+  Result := '';
+  SetLength(Result, MAX_PATH);
+  //https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getsystemdirectoryw
+  vLen := GetSystemDirectory(PChar(Result), MAX_PATH);
+  if vLen > 0 then
+  begin
+    SetLength(Result, vLen);
+  end
+  else
+  begin
+    RaiseLastWindowsError();
+  end;
+end;
+
+
+procedure RaiseLastWindowsError();
+begin
+  {$IFDEF DX_Supports_RaiseLastOSError}
+  RaiseLastOSError();
+  {$ELSE}
+  RaiseLastWin32Error();
+  {$ENDIF}
 end;
 
 
