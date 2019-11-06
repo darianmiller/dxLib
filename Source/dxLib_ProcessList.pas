@@ -68,7 +68,7 @@ type
   
 implementation
 uses
-  dxLib_ProcessNameToId,
+  dxLib_ProcessFileNameFromId,
   dxLib_WinApi,
   dxLib_WinInjection;
 
