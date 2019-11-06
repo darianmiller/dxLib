@@ -22,32 +22,32 @@ As of January 2016, latest version available online at:
 D5-XE+ Win32/Win64 Ready
 *)
 
-{$IFDEF VER80}    //Delphi 1, Borland: Released 14th February 1995, Codename Delphi/Wasabi/Mango
+{$IFDEF VER80}    //Delphi 1, Borland: Released 14th February 1995, Codenames: Delphi/Wasabi/Mango
   {$DEFINE DX_DELPHI1_UP}
 {$ENDIF}
-{$IFDEF VER90}    //Delphi 2, Borland: Released 10th February 1996, Codename Polaris
+{$IFDEF VER90}    //Delphi 2, Borland: Released 10th February 1996, Codename: Polaris
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
 {$ENDIF}
-{$IFDEF VER100}   //Delphi 3, Borland: Released 5th August 1997, Codename Ivory
+{$IFDEF VER100}   //Delphi 3, Borland: Released 5th August 1997, Codename: Ivory
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
 {$ENDIF}
-{$IFDEF VER120}   //Delphi 4, Borland: Released 17th June 1998, Codename Allegro
+{$IFDEF VER120}   //Delphi 4, Borland: Released 17th June 1998, Codename: Allegro
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
   {$DEFINE DX_DELPHI4_UP}
 {$ENDIF}
-{$IFDEF VER130}  //Delphi 5, Borland: Released 10th August 1999, Codename Argus
+{$IFDEF VER130}  //Delphi 5, Borland: Released 10th August 1999, Codename: Argus
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
   {$DEFINE DX_DELPHI4_UP}
   {$DEFINE DX_DELPHI5_UP}
 {$ENDIF}
-{$IFDEF VER140}  //Delphi 6, Borland: Released 21st May 2001, Codename Illiad
+{$IFDEF VER140}  //Delphi 6, Borland: Released 21st May 2001, Codename: Illiad
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -55,7 +55,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHI5_UP}
   {$DEFINE DX_DELPHI6_UP}
 {$ENDIF}
-{$IFDEF VER150}  //Delphi 7, Borland: Released 9th August 2002, Codename Aurora
+{$IFDEF VER150}  //Delphi 7, Borland: Released 9th August 2002, Codename: Aurora
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -64,7 +64,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHI6_UP}
   {$DEFINE DX_DELPHI7_UP}
 {$ENDIF}
-{$IFDEF VER160}  //Delphi 8 for .NET, Borland: Released 22nd December 2003, Codename Octane. Galileo IDE
+{$IFDEF VER160}  //Delphi 8 for .NET, Borland: Released 22nd December 2003, Codename: Octane. Galileo IDE
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -74,7 +74,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHI7_UP}
   {$DEFINE DX_DELPHI8_UP}
 {$ENDIF}
-{$IFDEF VER170} //(D9) Delphi 2005, Borland: Released 12th October 2004, Codename Diamondback
+{$IFDEF VER170} //(D9) Delphi 2005, Borland: Released 12th October 2004, Codename: Diamondback
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -97,7 +97,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHI2005_UP}
   {$DEFINE DX_DELPHI2006_UP}
 {$ENDIF}
-{$IFDEF VER185}  //(D11) Delphi 2007, Codegear: Released 16th March 2007, Codename Spacely
+{$IFDEF VER185}  //(D11) Delphi 2007, Codegear: Released 16th March 2007, Codename: Spacely
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -110,7 +110,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHI2006_UP}
   {$DEFINE DX_DELPHI2007_UP}
 {$ENDIF}
-{$IFDEF VER200}  //(D12) Delphi 2009, Embarcadero: Released 25th August 2008, Codename Tiburon
+{$IFDEF VER200}  //(D12) Delphi 2009, Embarcadero: Released 25th August 2008, Codename: Tiburon
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -125,7 +125,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHI2009_UP}
 {$ENDIF}
 //D13 skipped
-{$IFDEF VER210}  //(D14) Delphi 2010, Embarcadero: Released 25th August 2009, Codename Weaver
+{$IFDEF VER210}  //(D14) Delphi 2010, Embarcadero: Released 25th August 2009, Codename: Weaver
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -140,7 +140,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHI2009_UP}
   {$DEFINE DX_DELPHI2010_UP}
 {$ENDIF}
-{$IFDEF VER220}  //(D15) Delphi XE, Embarcadero: Released 30th August 2010, Codename Fulcrum
+{$IFDEF VER220}  //(D15) Delphi XE, Embarcadero: Released 30th August 2010, Codename: Fulcrum
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -156,7 +156,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHI2010_UP}
   {$DEFINE DX_DELPHIXE_UP}
 {$ENDIF}
-{$IFDEF VER230}  //(D16) Delphi XE2, Embarcadero: Released 1st September, 2011, Codename Pulsar
+{$IFDEF VER230}  //(D16) Delphi XE2, Embarcadero: Released 1st September, 2011, Codename: Pulsar
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -173,7 +173,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHIXE_UP}
   {$DEFINE DX_DELPHIXE2_UP}
 {$ENDIF}
-{$IFDEF VER240}  //(D17) Delphi XE3, Embarcadero: Released 4th September, 2012, Codename WaterDragon
+{$IFDEF VER240}  //(D17) Delphi XE3, Embarcadero: Released 4th September, 2012, Codename: WaterDragon
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -191,7 +191,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHIXE2_UP}
   {$DEFINE DX_DELPHIXE3_UP}
 {$ENDIF}
-{$IFDEF VER250}  //(D18) Delphi XE4, Embarcadero: Released 22nd April, 2013, Codename Quintessence
+{$IFDEF VER250}  //(D18) Delphi XE4, Embarcadero: Released 22nd April, 2013, Codename: Quintessence
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -210,7 +210,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHIXE3_UP}
   {$DEFINE DX_DELPHIXE4_UP}
 {$ENDIF}
-{$IFDEF VER260}  //(D19) Delphi XE5, Embarcadero: Released 11th September, 2013, Codename Zephyr
+{$IFDEF VER260}  //(D19) Delphi XE5, Embarcadero: Released 11th September, 2013, Codename: Zephyr
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -230,7 +230,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHIXE4_UP}
   {$DEFINE DX_DELPHIXE5_UP}
 {$ENDIF}
-{$IFDEF VER270}  //(D20) Delphi XE6, Embarcadero: Released 15th April, 2014, Codename Proteus
+{$IFDEF VER270}  //(D20) Delphi XE6, Embarcadero: Released 15th April, 2014, Codename: Proteus
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -251,7 +251,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHIXE5_UP}
   {$DEFINE DX_DELPHIXE6_UP}
 {$ENDIF}
-{$IFDEF VER280}  //(D21) Delphi XE7, Embarcadero: Released 2nd September, 2014, Codename Carpathia
+{$IFDEF VER280}  //(D21) Delphi XE7, Embarcadero: Released 2nd September, 2014, Codename: Carpathia
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -273,7 +273,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHIXE6_UP}
   {$DEFINE DX_DELPHIXE7_UP}
 {$ENDIF}
-{$IFDEF VER290}  //(D22) Delphi XE8, Embarcadero: Released 7th April, 2015, Codename Elbrus
+{$IFDEF VER290}  //(D22) Delphi XE8, Embarcadero: Released 7th April, 2015, Codename: Elbrus
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -296,7 +296,7 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHIXE7_UP}
   {$DEFINE DX_DELPHIXE8_UP}
 {$ENDIF}
-{$IFDEF VER300}  //(D23) Delphi 10 Seattle, Embarcadero: Released 31st August, 2015, Codename Aitana
+{$IFDEF VER300}  //(D23) Delphi 10 Seattle, Embarcadero: Released 31st August, 2015, Codename: Aitana
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
   {$DEFINE DX_DELPHI3_UP}
@@ -320,8 +320,86 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHIXE8_UP}
   {$DEFINE DX_DELPHI10SEATTLE_UP}
 {$ENDIF}
+{$IFDEF VER310}  //(D24) Delphi 10.1 Berlin, Embarcadero: Released April 2016, Codename: Big Ben
+  {$DEFINE DX_DELPHI1_UP}
+  {$DEFINE DX_DELPHI2_UP}
+  {$DEFINE DX_DELPHI3_UP}
+  {$DEFINE DX_DELPHI4_UP}
+  {$DEFINE DX_DELPHI5_UP}
+  {$DEFINE DX_DELPHI6_UP}
+  {$DEFINE DX_DELPHI7_UP}
+  {$DEFINE DX_DELPHI8_UP}
+  {$DEFINE DX_DELPHI2005_UP}
+  {$DEFINE DX_DELPHI2006_UP}
+  {$DEFINE DX_DELPHI2007_UP}
+  {$DEFINE DX_DELPHI2009_UP}
+  {$DEFINE DX_DELPHI2010_UP}
+  {$DEFINE DX_DELPHIXE_UP}
+  {$DEFINE DX_DELPHIXE2_UP}
+  {$DEFINE DX_DELPHIXE3_UP}
+  {$DEFINE DX_DELPHIXE4_UP}
+  {$DEFINE DX_DELPHIXE5_UP}
+  {$DEFINE DX_DELPHIXE6_UP}
+  {$DEFINE DX_DELPHIXE7_UP}
+  {$DEFINE DX_DELPHIXE8_UP}
+  {$DEFINE DX_DELPHI10SEATTLE_UP}
+  {$DEFINE DX_DELPHI101BERLIN_UP}
+{$ENDIF}
+{$IFDEF VER320}  //(D25) Delphi 10.2 Tokyo, Embarcadero: Released March 2017, Codename: Godzilla
+  {$DEFINE DX_DELPHI1_UP}
+  {$DEFINE DX_DELPHI2_UP}
+  {$DEFINE DX_DELPHI3_UP}
+  {$DEFINE DX_DELPHI4_UP}
+  {$DEFINE DX_DELPHI5_UP}
+  {$DEFINE DX_DELPHI6_UP}
+  {$DEFINE DX_DELPHI7_UP}
+  {$DEFINE DX_DELPHI8_UP}
+  {$DEFINE DX_DELPHI2005_UP}
+  {$DEFINE DX_DELPHI2006_UP}
+  {$DEFINE DX_DELPHI2007_UP}
+  {$DEFINE DX_DELPHI2009_UP}
+  {$DEFINE DX_DELPHI2010_UP}
+  {$DEFINE DX_DELPHIXE_UP}
+  {$DEFINE DX_DELPHIXE2_UP}
+  {$DEFINE DX_DELPHIXE3_UP}
+  {$DEFINE DX_DELPHIXE4_UP}
+  {$DEFINE DX_DELPHIXE5_UP}
+  {$DEFINE DX_DELPHIXE6_UP}
+  {$DEFINE DX_DELPHIXE7_UP}
+  {$DEFINE DX_DELPHIXE8_UP}
+  {$DEFINE DX_DELPHI10SEATTLE_UP}
+  {$DEFINE DX_DELPHI101BERLIN_UP}
+  {$DEFINE DX_DELPHI102TOKYO_UP}
+{$ENDIF}
+{$IFDEF VER330}  //(D26) Delphi 10.3 Rio, Embarcadero: Released November 2018, Codename: Carnival
+  {$DEFINE DX_DELPHI1_UP}
+  {$DEFINE DX_DELPHI2_UP}
+  {$DEFINE DX_DELPHI3_UP}
+  {$DEFINE DX_DELPHI4_UP}
+  {$DEFINE DX_DELPHI5_UP}
+  {$DEFINE DX_DELPHI6_UP}
+  {$DEFINE DX_DELPHI7_UP}
+  {$DEFINE DX_DELPHI8_UP}
+  {$DEFINE DX_DELPHI2005_UP}
+  {$DEFINE DX_DELPHI2006_UP}
+  {$DEFINE DX_DELPHI2007_UP}
+  {$DEFINE DX_DELPHI2009_UP}
+  {$DEFINE DX_DELPHI2010_UP}
+  {$DEFINE DX_DELPHIXE_UP}
+  {$DEFINE DX_DELPHIXE2_UP}
+  {$DEFINE DX_DELPHIXE3_UP}
+  {$DEFINE DX_DELPHIXE4_UP}
+  {$DEFINE DX_DELPHIXE5_UP}
+  {$DEFINE DX_DELPHIXE6_UP}
+  {$DEFINE DX_DELPHIXE7_UP}
+  {$DEFINE DX_DELPHIXE8_UP}
+  {$DEFINE DX_DELPHI10SEATTLE_UP}
+  {$DEFINE DX_DELPHI101BERLIN_UP}
+  {$DEFINE DX_DELPHI102TOKYO_UP}
+  {$DEFINE DX_DELPHI103RIO_UP}
+{$ENDIF}
 
-//UNKNOWN version - default to latest, currently Delphi 10 Seattle
+//UNKNOWN version - default to latest, currently Delphi 10.3 Rio
 {$IFNDEF DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI1_UP}
   {$DEFINE DX_DELPHI2_UP}
@@ -345,6 +423,9 @@ D5-XE+ Win32/Win64 Ready
   {$DEFINE DX_DELPHIXE7_UP}
   {$DEFINE DX_DELPHIXE8_UP}
   {$DEFINE DX_DELPHI10SEATTLE_UP}
+  {$DEFINE DX_DELPHI101BERLIN_UP}
+  {$DEFINE DX_DELPHI102TOKYO_UP}
+  {$DEFINE DX_DELPHI103RIO_UP}
 
   {$DEFINE DX_DELPHI_UNKNOWN_VERSION}
 {$ENDIF}
@@ -359,6 +440,8 @@ D5-XE+ Win32/Win64 Ready
 
 {$IFDEF DX_DELPHI6_UP}
   {$DEFINE DX_Has_Unit_Variants}
+  {$DEFINE DX_Supports_RaiseLastOSError}           //todo: validate
+  {$DEFINE DX_Supports_Deprecated_Warning}
   {$DEFINE DX_Supports_Sorted_GetPropList}         //re: TypInfo
   {$DEFINE DX_Supports_Symbol_Platform_Warning}    //re: WARN SYMBOL_PLATFORM OFF
 {$ENDIF}
@@ -366,6 +449,10 @@ D5-XE+ Win32/Win64 Ready
 {$IFDEF DX_DELPHI2006_UP}
   {$DEFINE DX_Supports_ReportMemoryLeaksOnShutdown}
   {$DEFINE DX_Supports_TBytes}
+{$ENDIF}
+
+{$IFDEF DX_DELPHI2007_UP}
+  {$DEFINE DX_Supports_MainFormOnTaskbar}
 {$ENDIF}
 
 {$IFDEF DX_DELPHI2009_UP}
