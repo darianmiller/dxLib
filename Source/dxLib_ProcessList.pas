@@ -41,7 +41,7 @@ uses
 type
 
   //https://docs.microsoft.com/en-us/windows/win32/api/tlhelp32/ns-tlhelp32-processentry32
-  TiaProcessEntryItem = class
+  TdxProcessEntryItem = class
   private
     fProcessID:DWORD;
     fThreads:DWORD;
@@ -58,7 +58,7 @@ type
     property OptionalFullPathName:string read fOptionalFullPathName write fOptionalFullPathName;
   end;
 
-  TaProcessEntryList = class(TObjectList)
+  TdxProcessEntryList = class(TObjectList)
   public
     function SnapShotActiveProcesses(const pLookupFullPathName:Boolean=False):Boolean;
   end;
@@ -74,14 +74,14 @@ uses
 
 
 //https://docs.microsoft.com/en-us/windows/win32/toolhelp/taking-a-snapshot-and-viewing-processes
-function TaProcessEntryList.SnapshotActiveProcesses(const pLookupFullPathName:Boolean=False):Boolean;
+function TdxProcessEntryList.SnapshotActiveProcesses(const pLookupFullPathName:Boolean=False):Boolean;
 var
   h:THandle;
   vPE32:TProcessEntry32;
-  vItem:TiaProcessEntryItem;
+  vItem:TdxProcessEntryItem;
   vFoundAProcess:Boolean;
   vKeepItem:Boolean;
-  vProcessLookup:TiaProcessNameToId;
+  vProcessLookup:TdxProcessNameToId;
 begin
   Clear;
 
@@ -96,7 +96,7 @@ begin
       while vFoundAProcess do
       begin
         vKeepItem := True;
-        vItem := TiaProcessEntryItem.Create();
+        vItem := TdxProcessEntryItem.Create();
         try
           vItem.ProcessID := vPE32.th32ProcessID;
           vItem.Threads := vPE32.cntThreads;
@@ -108,7 +108,7 @@ begin
           begin
             if not Assigned(vProcessLookup) then
             begin
-              vProcessLookup := TiaProcessNameToId.Create();
+              vProcessLookup := TdxProcessNameToId.Create();
             end;
             try
               vItem.OptionalFullPathName := vProcessLookup.GetFileNameByProcessID(vItem.ProcessID);
@@ -140,7 +140,7 @@ end;
 
 function SortProcessEntryByExeName(Item1, Item2: Pointer):Integer;
 begin
-  Result := CompareText(TiaProcessEntryItem(Item1).ExeFile, TiaProcessEntryItem(Item2).ExeFile);
+  Result := CompareText(TdxProcessEntryItem(Item1).ExeFile, TdxProcessEntryItem(Item2).ExeFile);
 end;
 
 end.
