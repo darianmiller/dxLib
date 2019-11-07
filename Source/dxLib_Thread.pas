@@ -69,6 +69,7 @@ type
   /// 2 main differences from TThread:
   ///   1):Descendants must override the Run() method.
   ///   2):Replace checking for Terminated in descendant Run loop with ThreadIsActive()
+  ///   3):Instead of using Windows.Sleep(), utlize the thread's Sleep() method so it can be aborted on thread shutdown
   ///</remarks>
   {$IFDEF NODEF}{$ENDREGION}{$ENDIF}
   TdxThread = class(TThread)
@@ -952,11 +953,7 @@ begin
       end;
     WAIT_FAILED:
        begin
-         {$IFDEF DX_DELPHI6_UP}
-         RaiseLastOSError;
-         {$ELSE}
-         RaiseLastWin32Error;
-         {$ENDIF}
+         RaiseLastWindowsError();
        end;
     end;
   end; //while not Terminated
