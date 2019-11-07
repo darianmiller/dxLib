@@ -58,7 +58,7 @@ procedure AppendStream(const aDestination:TStream; const aChar:AnsiChar); overlo
 begin
   if aChar <> '' then
   begin
-    aDestination.Write(@aChar, ByteLength(aChar));
+    aDestination.Write(PAnsiChar(aChar)^, ByteLength(aChar));
   end;
 end;
 
