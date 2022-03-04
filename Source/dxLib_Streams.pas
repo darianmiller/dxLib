@@ -41,6 +41,7 @@ uses
 
 implementation
 uses
+  System.SysUtils,
   dxLib_Strings;
 
 
@@ -58,7 +59,7 @@ procedure AppendStream(const aDestination:TStream; const aChar:AnsiChar); overlo
 begin
   if aChar <> '' then
   begin
-    aDestination.Write(PAnsiChar(aChar)^, ByteLength(aChar));
+    aDestination.Write(aChar, ByteLength(aChar));
   end;
 end;
 
