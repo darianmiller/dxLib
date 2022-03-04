@@ -99,10 +99,10 @@ uses
 
 function ByteLength(const aChar:Char):Integer;
 begin
-  Result := SizeOf(aChar);
+  Result := SizeOf(Char);
 end;
 
-{$IFNDEF DX_DELPHI2009_UP}  //available in System.SysUtils from D2009+
+{$IFNDEF DX_DELPHI2009_UP}
 function ByteLength(const aString:String):Integer;
 begin
   Result := Length(aString) * SizeOf(Char);
@@ -112,7 +112,7 @@ end;
 {$IFDEF DX_String_Is_UTF16}
 function ByteLength(const aChar:AnsiChar):Integer;
 begin
-  Result := SizeOf(aChar);
+  Result := SizeOf(AnsiChar);
 end;
 
 function ByteLength(const aString:AnsiString):Integer;
