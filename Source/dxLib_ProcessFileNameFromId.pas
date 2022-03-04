@@ -48,7 +48,7 @@ const
 
 type
 
-  TiaProcessNameToId = class
+  TdxProcessNameToId = class
   private
     fQueryFullProcessImageName:TQueryFullProcessImageName;
   public
@@ -67,7 +67,7 @@ uses
   dxLib_WinAPI;
 
 
-constructor TiaProcessNameToId.Create();
+constructor TdxProcessNameToId.Create();
 var
   h:HMODULE;
 begin
@@ -78,7 +78,7 @@ end;
 
 
 //requires Vista or later
-function TiaProcessNameToId.GetFileNameByProcessID(const pTargetProcessID:DWORD):string;
+function TdxProcessNameToId.GetFileNameByProcessID(const pTargetProcessID:DWORD):string;
 const
   PROCESS_QUERY_LIMITED_INFORMATION = $00001000;
 var
