@@ -729,12 +729,14 @@ begin
       begin
         SetStrProp(aInstance, aProperty, IntToStr(aVal));
       end;
-    {$IFDEF DX_String_Is_UTF16}
     tkUString,tkWString:
       begin
+        {$IFDEF DX_String_Is_UTF16}
+        SetStrProp(aInstance, aProperty, IntToStr(aVal));
+        {$ELSE}
         SetUnicodeStrProp(aInstance, aProperty, IntToStr(aVal));
+        {$ENDIF}
       end;
-    {$ENDIF}
     tkClass, tkInteger:
       begin
         SetOrdProp(aInstance, aProperty, aVal);
@@ -765,12 +767,14 @@ begin
       begin
         SetStrProp(aInstance, aProperty, IntToStr(aVal));
       end;
-    {$IFDEF DX_String_Is_UTF16}
     tkUString,tkWString:
       begin
+        {$IFDEF DX_String_Is_UTF16}
+        SetStrProp(aInstance, aProperty, IntToStr(aVal));
+        {$ELSE}
         SetUnicodeStrProp(aInstance, aProperty, IntToStr(aVal));
+        {$ENDIF}
       end;
-    {$ENDIF}
     tkInt64:
       begin
         SetInt64Prop(aInstance, aProperty, aVal);
@@ -788,12 +792,14 @@ begin
     begin
       SetVariantProp(aInstance, aProperty, Null);
     end
-    {$IFDEF DX_String_Is_UTF16}
     else if aProperty.PropType^.Kind in [tkUString,tkWString] then
     begin
+      {$IFDEF DX_String_Is_UTF16}
       SetStrProp(aInstance, aProperty, 'null');
+      {$ELSE}
+      SetUnicodeStrProp(aInstance, aProperty, 'null');
+      {$ENDIF}
     end
-    {$ENDIF}
     else if aProperty.PropType^.Kind in [tkString, tkLString] then
     begin
       SetStrProp(aInstance, aProperty, 'null');
@@ -811,12 +817,14 @@ begin
       begin
         SetStrProp(aInstance, aProperty, aVal);
       end;
-    {$IFDEF DX_String_Is_UTF16}
     tkUString,tkWString:
       begin
+        {$IFDEF DX_String_Is_UTF16}
+        SetStrProp(aInstance, aProperty, aVal);
+        {$ELSE}
         SetUnicodeStrProp(aInstance, aProperty, aVal);
+        {$ENDIF}
       end;
-    {$ENDIF}
     tkChar:
       begin
         if Length(aVal) = 1 then
