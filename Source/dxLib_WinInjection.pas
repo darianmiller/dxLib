@@ -59,7 +59,7 @@ begin
   Result := False;
   if ValidHandleValue(pTargetProcessID) then
   begin
-    vBytesToWrite := dxLib_Strings.ByteLength(pSourceDLLFullPathName) + 1;
+    vBytesToWrite := ByteLength(pSourceDLLFullPathName) + 1;
 
     vTargetProcessHandle := OpenProcess(PROCESS_CREATE_THREAD or PROCESS_QUERY_INFORMATION or PROCESS_VM_OPERATION or PROCESS_VM_WRITE or PROCESS_VM_READ, False, pTargetProcessID);
     if vTargetProcessHandle <> 0 then

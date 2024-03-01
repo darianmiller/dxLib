@@ -28,10 +28,10 @@ interface
   function ByteLength(const aChar:Char):Integer; overload;
   {$IFNDEF DX_DELPHI2009_UP}  //available in System.SysUtils from D2009+
   function ByteLength(const aString:String):Integer; overload;
+  function ByteLength(const aString:AnsiString):Integer; overload;
   {$ENDIF}
   {$IFDEF DX_String_Is_UTF16}
   function ByteLength(const aChar:AnsiChar):Integer; overload;
-  function ByteLength(const aString:AnsiString):Integer; overload;
   {$ENDIF}
 
   {$IFNDEF DX_Supports_CharInSet}
@@ -107,17 +107,16 @@ function ByteLength(const aString:String):Integer;
 begin
   Result := Length(aString) * SizeOf(Char);
 end;
+function ByteLength(const aString:AnsiString):Integer;
+begin
+  Result := Length(aString) * SizeOf(AnsiChar);
+end;
 {$ENDIF}
 
 {$IFDEF DX_String_Is_UTF16}
 function ByteLength(const aChar:AnsiChar):Integer;
 begin
   Result := SizeOf(AnsiChar);
-end;
-
-function ByteLength(const aString:AnsiString):Integer;
-begin
-  Result := Length(aString) * SizeOf(AnsiChar);
 end;
 {$ENDIF}
 
